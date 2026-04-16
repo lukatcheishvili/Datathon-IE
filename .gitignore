@@ -1,0 +1,14 @@
+# Large raw data files (re-downloadable)
+Datathon/data/chargers/electrolineras.xml
+
+# Cloned external repo
+Datathon/data/ev_proj/
+
+# Python artifacts
+__pycache__/
+*.pyc
+.ipynb_checkpoints/
+
+# OS
+.DS_Store
+desktop.ini
