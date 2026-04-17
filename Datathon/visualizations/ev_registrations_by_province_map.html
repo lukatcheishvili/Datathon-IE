@@ -1,0 +1,1744 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Electric Vehicle Registrations by Province — Spain (DGT Microdata)</title>
+    
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+    <script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.3/dist/leaflet.js"></script>
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Leaflet.awesome-markers/2.0.2/leaflet.awesome-markers.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.3/dist/leaflet.css"/>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/css/bootstrap.min.css"/>
+    <link rel="stylesheet" href="https://netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap-glyphicons.css"/>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.2.0/css/all.min.css"/>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/Leaflet.awesome-markers/2.0.2/leaflet.awesome-markers.css"/>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/python-visualization/folium/folium/templates/leaflet.awesome.rotate.min.css"/>
+    
+            <meta name="viewport" content="width=device-width,
+                initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+            <style>
+                #map_c5de23e43d497085ccb9dedb26939a51 {
+                    position: relative;
+                    width: 100.0%;
+                    height: 100.0%;
+                    left: 0.0%;
+                    top: 0.0%;
+                }
+                .leaflet-container { font-size: 1rem; }
+            </style>
+
+            <style>html, body {
+                width: 100%;
+                height: 100%;
+                margin: 0;
+                padding: 0;
+            }
+            </style>
+
+            <style>#map {
+                position:absolute;
+                top:0;
+                bottom:0;
+                right:0;
+                left:0;
+                }
+            </style>
+
+            <script>
+                L_NO_TOUCH = false;
+                L_DISABLE_3D = false;
+            </script>
+
+        
+    <script src="https://cdn.jsdelivr.net/gh/python-visualization/folium@main/folium/templates/leaflet_heat.min.js"></script>
+</head>
+<body>
+
+<style>
+  .viz-header {
+    font-family: 'Segoe UI', Arial, sans-serif;
+    background: #1a1f36;
+    color: #f0f2f8;
+    padding: 18px 28px 14px;
+    box-sizing: border-box;
+    width: 100%;
+  }
+  .viz-header h1 {
+    margin: 0 0 6px;
+    font-size: 20px;
+    font-weight: 600;
+    letter-spacing: 0.2px;
+  }
+  .viz-header .meta {
+    font-size: 12px;
+    color: #9ba3c4;
+    margin-bottom: 8px;
+  }
+  .viz-header .description {
+    font-size: 13px;
+    color: #c8cde8;
+    line-height: 1.55;
+    border-top: 1px solid #2e3457;
+    padding-top: 8px;
+    margin-top: 4px;
+  }
+  .viz-header .description b { color: #e8ebf8; }
+</style>
+<div class="viz-header">
+  <h1>Electric Vehicle Registrations by Province — Spain (DGT Microdata)</h1>
+  <div class="meta">Data source: DGT (Direcci&oacute;n General de Tr&aacute;fico) &mdash; MATRABA Monthly Vehicle Registration Microdata</div>
+  <div class="description">Choropleth map showing cumulative EV registrations (pure electric + plug-in hybrid) by Spanish province, derived from DGT monthly microdata files. Darker shading indicates higher total EV stock. A second layer shows annual registration growth rate, highlighting provinces with the fastest adoption. This distribution directly informs where future public charging demand will be highest. Hover over each province for exact registration counts and propulsion type breakdown.</div>
+</div>
+
+    
+    <div style="position:fixed;top:10px;left:60px;z-index:1000;background:white;padding:8px 12px;border:2px solid #ccc;border-radius:6px;font-size:14px;font-weight:bold">EV Registrations — Spain by Province (2025) [Folium]<br><span style="font-size:11px;font-weight:normal">Circles = EV count · Heat = density distribution</span></div>
+    
+            <div class="folium-map" id="map_c5de23e43d497085ccb9dedb26939a51" ></div>
+        
+</body>
+<script>
+    
+    
+            var map_c5de23e43d497085ccb9dedb26939a51 = L.map(
+                "map_c5de23e43d497085ccb9dedb26939a51",
+                {
+                    center: [40.2, -3.5],
+                    crs: L.CRS.EPSG3857,
+                    ...{
+  "zoom": 6,
+  "zoomControl": true,
+  "preferCanvas": false,
+}
+
+                }
+            );
+
+            
+
+        
+    
+            var tile_layer_92de2a789b9677f784a4998da28d23c9 = L.tileLayer(
+                "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
+                {
+  "minZoom": 0,
+  "maxZoom": 19,
+  "maxNativeZoom": 19,
+  "noWrap": false,
+  "attribution": "\u0026copy; \u003ca href=\"https://www.openstreetmap.org/copyright\"\u003eOpenStreetMap\u003c/a\u003e contributors",
+  "subdomains": "abc",
+  "detectRetina": false,
+  "tms": false,
+  "opacity": 1,
+}
+
+            );
+        
+    
+            tile_layer_92de2a789b9677f784a4998da28d23c9.addTo(map_c5de23e43d497085ccb9dedb26939a51);
+        
+    
+            var circle_marker_6aec7f73306ecbe01a553e313e944843 = L.circleMarker(
+                [38.504, -0.324],
+                {"bubblingMouseEvents": true, "color": "#08306b", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#4292c6", "fillOpacity": 0.75, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 8.083755167893516, "stroke": true, "weight": 1}
+            ).addTo(map_c5de23e43d497085ccb9dedb26939a51);
+        
+    
+        var popup_daef11fa0212123e50c3cfe2cee43a42 = L.popup({
+  "maxWidth": 230,
+});
+
+        
+            
+                var html_af993a2b9b19c4e74f60c9d724baeaac = $(`<div id="html_af993a2b9b19c4e74f60c9d724baeaac" style="width: 100.0%; height: 100.0%;"><b>Alicante</b><br>EV Registrations 2025: 5,461</div>`)[0];
+                popup_daef11fa0212123e50c3cfe2cee43a42.setContent(html_af993a2b9b19c4e74f60c9d724baeaac);
+            
+        
+
+        circle_marker_6aec7f73306ecbe01a553e313e944843.bindPopup(popup_daef11fa0212123e50c3cfe2cee43a42)
+        ;
+
+        
+    
+    
+            circle_marker_6aec7f73306ecbe01a553e313e944843.bindTooltip(
+                `<div>
+                     Alicante — 5,461 EVs
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var circle_marker_02ee08269bd1be264e475eb4f14eda2b = L.circleMarker(
+                [38.996, -1.858],
+                {"bubblingMouseEvents": true, "color": "#08306b", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#4292c6", "fillOpacity": 0.75, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 5.250720984168599, "stroke": true, "weight": 1}
+            ).addTo(map_c5de23e43d497085ccb9dedb26939a51);
+        
+    
+        var popup_573ca4e92be1d1ed624e3e0b4f835cbb = L.popup({
+  "maxWidth": 230,
+});
+
+        
+            
+                var html_7608c6016826ab9e96ea27be45fd7f20 = $(`<div id="html_7608c6016826ab9e96ea27be45fd7f20" style="width: 100.0%; height: 100.0%;"><b>Albacete</b><br>EV Registrations 2025: 444</div>`)[0];
+                popup_573ca4e92be1d1ed624e3e0b4f835cbb.setContent(html_7608c6016826ab9e96ea27be45fd7f20);
+            
+        
+
+        circle_marker_02ee08269bd1be264e475eb4f14eda2b.bindPopup(popup_573ca4e92be1d1ed624e3e0b4f835cbb)
+        ;
+
+        
+    
+    
+            circle_marker_02ee08269bd1be264e475eb4f14eda2b.bindTooltip(
+                `<div>
+                     Albacete — 444 EVs
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var circle_marker_86270abb941f988908f7c92aa5fe7406 = L.circleMarker(
+                [37.004, -2.097],
+                {"bubblingMouseEvents": true, "color": "#08306b", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#4292c6", "fillOpacity": 0.75, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 5.52007663607946, "stroke": true, "weight": 1}
+            ).addTo(map_c5de23e43d497085ccb9dedb26939a51);
+        
+    
+        var popup_fddd0dba7f19160967771ee1629349bc = L.popup({
+  "maxWidth": 230,
+});
+
+        
+            
+                var html_e62c1b2de351b2480e0339da31843090 = $(`<div id="html_e62c1b2de351b2480e0339da31843090" style="width: 100.0%; height: 100.0%;"><b>Almería</b><br>EV Registrations 2025: 921</div>`)[0];
+                popup_fddd0dba7f19160967771ee1629349bc.setContent(html_e62c1b2de351b2480e0339da31843090);
+            
+        
+
+        circle_marker_86270abb941f988908f7c92aa5fe7406.bindPopup(popup_fddd0dba7f19160967771ee1629349bc)
+        ;
+
+        
+    
+    
+            circle_marker_86270abb941f988908f7c92aa5fe7406.bindTooltip(
+                `<div>
+                     Almería — 921 EVs
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var circle_marker_7f2fa89821e0a60879647fbbc9859924 = L.circleMarker(
+                [40.656, -4.697],
+                {"bubblingMouseEvents": true, "color": "#08306b", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#4292c6", "fillOpacity": 0.75, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 5.110113945749723, "stroke": true, "weight": 1}
+            ).addTo(map_c5de23e43d497085ccb9dedb26939a51);
+        
+    
+        var popup_ca8c44a2e190db15bce81c699e3ba542 = L.popup({
+  "maxWidth": 230,
+});
+
+        
+            
+                var html_444eda5e78791e65b0229d03a01b16c9 = $(`<div id="html_444eda5e78791e65b0229d03a01b16c9" style="width: 100.0%; height: 100.0%;"><b>Ávila</b><br>EV Registrations 2025: 195</div>`)[0];
+                popup_ca8c44a2e190db15bce81c699e3ba542.setContent(html_444eda5e78791e65b0229d03a01b16c9);
+            
+        
+
+        circle_marker_7f2fa89821e0a60879647fbbc9859924.bindPopup(popup_ca8c44a2e190db15bce81c699e3ba542)
+        ;
+
+        
+    
+    
+            circle_marker_7f2fa89821e0a60879647fbbc9859924.bindTooltip(
+                `<div>
+                     Ávila — 195 EVs
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var circle_marker_0714976c4abba0a023b1c4756385d62b = L.circleMarker(
+                [41.582, 2.173],
+                {"bubblingMouseEvents": true, "color": "#08306b", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#4292c6", "fillOpacity": 0.75, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 14.722779066249874, "stroke": true, "weight": 1}
+            ).addTo(map_c5de23e43d497085ccb9dedb26939a51);
+        
+    
+        var popup_0286763d39de00db83bac23c002b994f = L.popup({
+  "maxWidth": 230,
+});
+
+        
+            
+                var html_3cbf8ae24736343b1bbbb0d035560418 = $(`<div id="html_3cbf8ae24736343b1bbbb0d035560418" style="width: 100.0%; height: 100.0%;"><b>Barcelona</b><br>EV Registrations 2025: 17,218</div>`)[0];
+                popup_0286763d39de00db83bac23c002b994f.setContent(html_3cbf8ae24736343b1bbbb0d035560418);
+            
+        
+
+        circle_marker_0714976c4abba0a023b1c4756385d62b.bindPopup(popup_0286763d39de00db83bac23c002b994f)
+        ;
+
+        
+    
+    
+            circle_marker_0714976c4abba0a023b1c4756385d62b.bindTooltip(
+                `<div>
+                     Barcelona — 17,218 EVs
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var circle_marker_e49c13effb53047943657974b87aba0e = L.circleMarker(
+                [38.879, -6.971],
+                {"bubblingMouseEvents": true, "color": "#08306b", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#4292c6", "fillOpacity": 0.75, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 5.4489260865181, "stroke": true, "weight": 1}
+            ).addTo(map_c5de23e43d497085ccb9dedb26939a51);
+        
+    
+        var popup_825d690b2d0350599fe9429cf8530d30 = L.popup({
+  "maxWidth": 230,
+});
+
+        
+            
+                var html_ba8babe85457f7b868692099674aff12 = $(`<div id="html_ba8babe85457f7b868692099674aff12" style="width: 100.0%; height: 100.0%;"><b>Badajoz</b><br>EV Registrations 2025: 795</div>`)[0];
+                popup_825d690b2d0350599fe9429cf8530d30.setContent(html_ba8babe85457f7b868692099674aff12);
+            
+        
+
+        circle_marker_e49c13effb53047943657974b87aba0e.bindPopup(popup_825d690b2d0350599fe9429cf8530d30)
+        ;
+
+        
+    
+    
+            circle_marker_e49c13effb53047943657974b87aba0e.bindTooltip(
+                `<div>
+                     Badajoz — 795 EVs
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var circle_marker_91f73b561c3c804b569dd1b1b22596f1 = L.circleMarker(
+                [43.263, -2.935],
+                {"bubblingMouseEvents": true, "color": "#08306b", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#4292c6", "fillOpacity": 0.75, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 6.131632550166381, "stroke": true, "weight": 1}
+            ).addTo(map_c5de23e43d497085ccb9dedb26939a51);
+        
+    
+        var popup_99253ae689d5e7eb632b21f721dbd381 = L.popup({
+  "maxWidth": 230,
+});
+
+        
+            
+                var html_342473bd634fc739f5f949b7a40705d3 = $(`<div id="html_342473bd634fc739f5f949b7a40705d3" style="width: 100.0%; height: 100.0%;"><b>Bizkaia</b><br>EV Registrations 2025: 2,004</div>`)[0];
+                popup_99253ae689d5e7eb632b21f721dbd381.setContent(html_342473bd634fc739f5f949b7a40705d3);
+            
+        
+
+        circle_marker_91f73b561c3c804b569dd1b1b22596f1.bindPopup(popup_99253ae689d5e7eb632b21f721dbd381)
+        ;
+
+        
+    
+    
+            circle_marker_91f73b561c3c804b569dd1b1b22596f1.bindTooltip(
+                `<div>
+                     Bizkaia — 2,004 EVs
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var circle_marker_4b9acaeabc2758d91e8c1ae2c2d6d822 = L.circleMarker(
+                [42.344, -3.697],
+                {"bubblingMouseEvents": true, "color": "#08306b", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#4292c6", "fillOpacity": 0.75, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 5.273308460219825, "stroke": true, "weight": 1}
+            ).addTo(map_c5de23e43d497085ccb9dedb26939a51);
+        
+    
+        var popup_44217f42bf9101b1dac16016cb77ae60 = L.popup({
+  "maxWidth": 230,
+});
+
+        
+            
+                var html_80e2742574acef5139978f97d85aa19c = $(`<div id="html_80e2742574acef5139978f97d85aa19c" style="width: 100.0%; height: 100.0%;"><b>Burgos</b><br>EV Registrations 2025: 484</div>`)[0];
+                popup_44217f42bf9101b1dac16016cb77ae60.setContent(html_80e2742574acef5139978f97d85aa19c);
+            
+        
+
+        circle_marker_4b9acaeabc2758d91e8c1ae2c2d6d822.bindPopup(popup_44217f42bf9101b1dac16016cb77ae60)
+        ;
+
+        
+    
+    
+            circle_marker_4b9acaeabc2758d91e8c1ae2c2d6d822.bindTooltip(
+                `<div>
+                     Burgos — 484 EVs
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var circle_marker_0fa1fb6d2ccb8702345472b7537e58a4 = L.circleMarker(
+                [43.132, -8.414],
+                {"bubblingMouseEvents": true, "color": "#08306b", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#4292c6", "fillOpacity": 0.75, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 6.045800141171725, "stroke": true, "weight": 1}
+            ).addTo(map_c5de23e43d497085ccb9dedb26939a51);
+        
+    
+        var popup_1fce52c0b16b8f08a190cc1bfa6a42ce = L.popup({
+  "maxWidth": 230,
+});
+
+        
+            
+                var html_18278e432eaa5bca92530e30133b8b28 = $(`<div id="html_18278e432eaa5bca92530e30133b8b28" style="width: 100.0%; height: 100.0%;"><b>A Coruña</b><br>EV Registrations 2025: 1,852</div>`)[0];
+                popup_1fce52c0b16b8f08a190cc1bfa6a42ce.setContent(html_18278e432eaa5bca92530e30133b8b28);
+            
+        
+
+        circle_marker_0fa1fb6d2ccb8702345472b7537e58a4.bindPopup(popup_1fce52c0b16b8f08a190cc1bfa6a42ce)
+        ;
+
+        
+    
+    
+            circle_marker_0fa1fb6d2ccb8702345472b7537e58a4.bindTooltip(
+                `<div>
+                     A Coruña — 1,852 EVs
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var circle_marker_90d9221b831c8090f8c17133c955b3c2 = L.circleMarker(
+                [36.516, -5.903],
+                {"bubblingMouseEvents": true, "color": "#08306b", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#4292c6", "fillOpacity": 0.75, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 5.88825249571443, "stroke": true, "weight": 1}
+            ).addTo(map_c5de23e43d497085ccb9dedb26939a51);
+        
+    
+        var popup_eb0991733a0392e31981434e125c6833 = L.popup({
+  "maxWidth": 230,
+});
+
+        
+            
+                var html_cd52faf0c1e4eb7c7c3f92ef60cbe6f9 = $(`<div id="html_cd52faf0c1e4eb7c7c3f92ef60cbe6f9" style="width: 100.0%; height: 100.0%;"><b>Cádiz</b><br>EV Registrations 2025: 1,573</div>`)[0];
+                popup_eb0991733a0392e31981434e125c6833.setContent(html_cd52faf0c1e4eb7c7c3f92ef60cbe6f9);
+            
+        
+
+        circle_marker_90d9221b831c8090f8c17133c955b3c2.bindPopup(popup_eb0991733a0392e31981434e125c6833)
+        ;
+
+        
+    
+    
+            circle_marker_90d9221b831c8090f8c17133c955b3c2.bindTooltip(
+                `<div>
+                     Cádiz — 1,573 EVs
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var circle_marker_976246c8f576b674c0a0541cd0fe1c6a = L.circleMarker(
+                [39.475, -6.372],
+                {"bubblingMouseEvents": true, "color": "#08306b", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#4292c6", "fillOpacity": 0.75, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 5.193687607139256, "stroke": true, "weight": 1}
+            ).addTo(map_c5de23e43d497085ccb9dedb26939a51);
+        
+    
+        var popup_4790da821f1e316046fe4dfc6d796c13 = L.popup({
+  "maxWidth": 230,
+});
+
+        
+            
+                var html_215e94132846315fdffb9d858e01e948 = $(`<div id="html_215e94132846315fdffb9d858e01e948" style="width: 100.0%; height: 100.0%;"><b>Cáceres</b><br>EV Registrations 2025: 343</div>`)[0];
+                popup_4790da821f1e316046fe4dfc6d796c13.setContent(html_215e94132846315fdffb9d858e01e948);
+            
+        
+
+        circle_marker_976246c8f576b674c0a0541cd0fe1c6a.bindPopup(popup_4790da821f1e316046fe4dfc6d796c13)
+        ;
+
+        
+    
+    
+            circle_marker_976246c8f576b674c0a0541cd0fe1c6a.bindTooltip(
+                `<div>
+                     Cáceres — 343 EVs
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var circle_marker_bd04dd99f98097ce91c667faa6e0546b = L.circleMarker(
+                [35.889, -5.321],
+                {"bubblingMouseEvents": true, "color": "#08306b", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#4292c6", "fillOpacity": 0.75, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 5.037269335484521, "stroke": true, "weight": 1}
+            ).addTo(map_c5de23e43d497085ccb9dedb26939a51);
+        
+    
+        var popup_9036859838a5cfacf6151b8768176faf = L.popup({
+  "maxWidth": 230,
+});
+
+        
+            
+                var html_dfdf6f086f3b4d5ab55d185f7e1f819c = $(`<div id="html_dfdf6f086f3b4d5ab55d185f7e1f819c" style="width: 100.0%; height: 100.0%;"><b>Ceuta</b><br>EV Registrations 2025: 66</div>`)[0];
+                popup_9036859838a5cfacf6151b8768176faf.setContent(html_dfdf6f086f3b4d5ab55d185f7e1f819c);
+            
+        
+
+        circle_marker_bd04dd99f98097ce91c667faa6e0546b.bindPopup(popup_9036859838a5cfacf6151b8768176faf)
+        ;
+
+        
+    
+    
+            circle_marker_bd04dd99f98097ce91c667faa6e0546b.bindTooltip(
+                `<div>
+                     Ceuta — 66 EVs
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var circle_marker_7bc489eee40dcaf725be08fd564c2042 = L.circleMarker(
+                [37.885, -4.779],
+                {"bubblingMouseEvents": true, "color": "#08306b", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#4292c6", "fillOpacity": 0.75, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 5.429726731874559, "stroke": true, "weight": 1}
+            ).addTo(map_c5de23e43d497085ccb9dedb26939a51);
+        
+    
+        var popup_28871cca5807e2ce6db3f47420c2f370 = L.popup({
+  "maxWidth": 230,
+});
+
+        
+            
+                var html_070a4f64845561d3dff5cc605fbecdfc = $(`<div id="html_070a4f64845561d3dff5cc605fbecdfc" style="width: 100.0%; height: 100.0%;"><b>Córdoba</b><br>EV Registrations 2025: 761</div>`)[0];
+                popup_28871cca5807e2ce6db3f47420c2f370.setContent(html_070a4f64845561d3dff5cc605fbecdfc);
+            
+        
+
+        circle_marker_7bc489eee40dcaf725be08fd564c2042.bindPopup(popup_28871cca5807e2ce6db3f47420c2f370)
+        ;
+
+        
+    
+    
+            circle_marker_7bc489eee40dcaf725be08fd564c2042.bindTooltip(
+                `<div>
+                     Córdoba — 761 EVs
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var circle_marker_05523144188e3c66c5b85a0b41f714ab = L.circleMarker(
+                [39.003, -3.917],
+                {"bubblingMouseEvents": true, "color": "#08306b", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#4292c6", "fillOpacity": 0.75, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 5.26935565191086, "stroke": true, "weight": 1}
+            ).addTo(map_c5de23e43d497085ccb9dedb26939a51);
+        
+    
+        var popup_fb7eec816d275e3038c1ea7f159d2d0a = L.popup({
+  "maxWidth": 230,
+});
+
+        
+            
+                var html_823884860ec42c035ecf81525a330f67 = $(`<div id="html_823884860ec42c035ecf81525a330f67" style="width: 100.0%; height: 100.0%;"><b>Ciudad Real</b><br>EV Registrations 2025: 477</div>`)[0];
+                popup_fb7eec816d275e3038c1ea7f159d2d0a.setContent(html_823884860ec42c035ecf81525a330f67);
+            
+        
+
+        circle_marker_05523144188e3c66c5b85a0b41f714ab.bindPopup(popup_fb7eec816d275e3038c1ea7f159d2d0a)
+        ;
+
+        
+    
+    
+            circle_marker_05523144188e3c66c5b85a0b41f714ab.bindTooltip(
+                `<div>
+                     Ciudad Real — 477 EVs
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var circle_marker_cae117cfd5061f685b56f23ac5f7bf06 = L.circleMarker(
+                [39.986, -0.051],
+                {"bubblingMouseEvents": true, "color": "#08306b", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#4292c6", "fillOpacity": 0.75, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 5.7092467480084705, "stroke": true, "weight": 1}
+            ).addTo(map_c5de23e43d497085ccb9dedb26939a51);
+        
+    
+        var popup_53d1d3ee7a8f5995a3f8f02a6bdb5573 = L.popup({
+  "maxWidth": 230,
+});
+
+        
+            
+                var html_0a9aadb7e56e5c46385c63388aec33b9 = $(`<div id="html_0a9aadb7e56e5c46385c63388aec33b9" style="width: 100.0%; height: 100.0%;"><b>Castellón</b><br>EV Registrations 2025: 1,256</div>`)[0];
+                popup_53d1d3ee7a8f5995a3f8f02a6bdb5573.setContent(html_0a9aadb7e56e5c46385c63388aec33b9);
+            
+        
+
+        circle_marker_cae117cfd5061f685b56f23ac5f7bf06.bindPopup(popup_53d1d3ee7a8f5995a3f8f02a6bdb5573)
+        ;
+
+        
+    
+    
+            circle_marker_cae117cfd5061f685b56f23ac5f7bf06.bindTooltip(
+                `<div>
+                     Castellón — 1,256 EVs
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var circle_marker_9ab6d311efa89f36a6b22ec9a89bb076 = L.circleMarker(
+                [40.07, -2.137],
+                {"bubblingMouseEvents": true, "color": "#08306b", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#4292c6", "fillOpacity": 0.75, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 5.121972370676616, "stroke": true, "weight": 1}
+            ).addTo(map_c5de23e43d497085ccb9dedb26939a51);
+        
+    
+        var popup_88de256936d41a4dac57ee580a8bdc3e = L.popup({
+  "maxWidth": 230,
+});
+
+        
+            
+                var html_bd61b81b4d6aeaddbaf3af93be676035 = $(`<div id="html_bd61b81b4d6aeaddbaf3af93be676035" style="width: 100.0%; height: 100.0%;"><b>Cuenca</b><br>EV Registrations 2025: 216</div>`)[0];
+                popup_88de256936d41a4dac57ee580a8bdc3e.setContent(html_bd61b81b4d6aeaddbaf3af93be676035);
+            
+        
+
+        circle_marker_9ab6d311efa89f36a6b22ec9a89bb076.bindPopup(popup_88de256936d41a4dac57ee580a8bdc3e)
+        ;
+
+        
+    
+    
+            circle_marker_9ab6d311efa89f36a6b22ec9a89bb076.bindTooltip(
+                `<div>
+                     Cuenca — 216 EVs
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var circle_marker_c42e80b81c406ad31df74e42bd0b016f = L.circleMarker(
+                [28.123, -15.436],
+                {"bubblingMouseEvents": true, "color": "#08306b", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#4292c6", "fillOpacity": 0.75, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 6.626298275688212, "stroke": true, "weight": 1}
+            ).addTo(map_c5de23e43d497085ccb9dedb26939a51);
+        
+    
+        var popup_791ca1edad17db3e15cf6df76907cfd0 = L.popup({
+  "maxWidth": 230,
+});
+
+        
+            
+                var html_cc21aec76ff24f8409796a1636fcf289 = $(`<div id="html_cc21aec76ff24f8409796a1636fcf289" style="width: 100.0%; height: 100.0%;"><b>Las Palmas</b><br>EV Registrations 2025: 2,880</div>`)[0];
+                popup_791ca1edad17db3e15cf6df76907cfd0.setContent(html_cc21aec76ff24f8409796a1636fcf289);
+            
+        
+
+        circle_marker_c42e80b81c406ad31df74e42bd0b016f.bindPopup(popup_791ca1edad17db3e15cf6df76907cfd0)
+        ;
+
+        
+    
+    
+            circle_marker_c42e80b81c406ad31df74e42bd0b016f.bindTooltip(
+                `<div>
+                     Las Palmas — 2,880 EVs
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var circle_marker_7688484775e6d10f5e66d24990497fce = L.circleMarker(
+                [37.177, -3.599],
+                {"bubblingMouseEvents": true, "color": "#08306b", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#4292c6", "fillOpacity": 0.75, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 5.836865987697893, "stroke": true, "weight": 1}
+            ).addTo(map_c5de23e43d497085ccb9dedb26939a51);
+        
+    
+        var popup_ffe2aba64703cd7c756a54daf6c03d6e = L.popup({
+  "maxWidth": 230,
+});
+
+        
+            
+                var html_4794e813adcddf1777c21decf545c803 = $(`<div id="html_4794e813adcddf1777c21decf545c803" style="width: 100.0%; height: 100.0%;"><b>Granada</b><br>EV Registrations 2025: 1,482</div>`)[0];
+                popup_ffe2aba64703cd7c756a54daf6c03d6e.setContent(html_4794e813adcddf1777c21decf545c803);
+            
+        
+
+        circle_marker_7688484775e6d10f5e66d24990497fce.bindPopup(popup_ffe2aba64703cd7c756a54daf6c03d6e)
+        ;
+
+        
+    
+    
+            circle_marker_7688484775e6d10f5e66d24990497fce.bindTooltip(
+                `<div>
+                     Granada — 1,482 EVs
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var circle_marker_d21bd5f7dc572204fa388ef99b4cc328 = L.circleMarker(
+                [40.632, -3.167],
+                {"bubblingMouseEvents": true, "color": "#08306b", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#4292c6", "fillOpacity": 0.75, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 5.43989109609761, "stroke": true, "weight": 1}
+            ).addTo(map_c5de23e43d497085ccb9dedb26939a51);
+        
+    
+        var popup_22c8225d88dcdf49aa1861e8b1c9f7ca = L.popup({
+  "maxWidth": 230,
+});
+
+        
+            
+                var html_835367d1781211932003975af94a91e9 = $(`<div id="html_835367d1781211932003975af94a91e9" style="width: 100.0%; height: 100.0%;"><b>Guadalajara</b><br>EV Registrations 2025: 779</div>`)[0];
+                popup_22c8225d88dcdf49aa1861e8b1c9f7ca.setContent(html_835367d1781211932003975af94a91e9);
+            
+        
+
+        circle_marker_d21bd5f7dc572204fa388ef99b4cc328.bindPopup(popup_22c8225d88dcdf49aa1861e8b1c9f7ca)
+        ;
+
+        
+    
+    
+            circle_marker_d21bd5f7dc572204fa388ef99b4cc328.bindTooltip(
+                `<div>
+                     Guadalajara — 779 EVs
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var circle_marker_d2023d41e8bed07c5679488fcd1ca78d = L.circleMarker(
+                [37.261, -6.945],
+                {"bubblingMouseEvents": true, "color": "#08306b", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#4292c6", "fillOpacity": 0.75, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 5.290249067258244, "stroke": true, "weight": 1}
+            ).addTo(map_c5de23e43d497085ccb9dedb26939a51);
+        
+    
+        var popup_0305ef148b7f989557afefd7f4230f40 = L.popup({
+  "maxWidth": 230,
+});
+
+        
+            
+                var html_8efe78b18bbc61dad35c5b194876f7ce = $(`<div id="html_8efe78b18bbc61dad35c5b194876f7ce" style="width: 100.0%; height: 100.0%;"><b>Huelva</b><br>EV Registrations 2025: 514</div>`)[0];
+                popup_0305ef148b7f989557afefd7f4230f40.setContent(html_8efe78b18bbc61dad35c5b194876f7ce);
+            
+        
+
+        circle_marker_d2023d41e8bed07c5679488fcd1ca78d.bindPopup(popup_0305ef148b7f989557afefd7f4230f40)
+        ;
+
+        
+    
+    
+            circle_marker_d2023d41e8bed07c5679488fcd1ca78d.bindTooltip(
+                `<div>
+                     Huelva — 514 EVs
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var circle_marker_d10410138ed1ad8f422fb36b4bbb1cfa = L.circleMarker(
+                [42.136, -0.409],
+                {"bubblingMouseEvents": true, "color": "#08306b", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#4292c6", "fillOpacity": 0.75, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 5.193687607139256, "stroke": true, "weight": 1}
+            ).addTo(map_c5de23e43d497085ccb9dedb26939a51);
+        
+    
+        var popup_f4c450cf49761fecb3122c6a549909a0 = L.popup({
+  "maxWidth": 230,
+});
+
+        
+            
+                var html_ce7c902d1079b95e57e2acdc502f5703 = $(`<div id="html_ce7c902d1079b95e57e2acdc502f5703" style="width: 100.0%; height: 100.0%;"><b>Huesca</b><br>EV Registrations 2025: 343</div>`)[0];
+                popup_f4c450cf49761fecb3122c6a549909a0.setContent(html_ce7c902d1079b95e57e2acdc502f5703);
+            
+        
+
+        circle_marker_d10410138ed1ad8f422fb36b4bbb1cfa.bindPopup(popup_f4c450cf49761fecb3122c6a549909a0)
+        ;
+
+        
+    
+    
+            circle_marker_d10410138ed1ad8f422fb36b4bbb1cfa.bindTooltip(
+                `<div>
+                     Huesca — 343 EVs
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var circle_marker_3aeff3cd45799ef54d4cdfff9e63f563 = L.circleMarker(
+                [39.569, 2.65],
+                {"bubblingMouseEvents": true, "color": "#08306b", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#4292c6", "fillOpacity": 0.75, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 7.549561359282041, "stroke": true, "weight": 1}
+            ).addTo(map_c5de23e43d497085ccb9dedb26939a51);
+        
+    
+        var popup_b2a3c1d132a5b3085c4d51188a0a8c47 = L.popup({
+  "maxWidth": 230,
+});
+
+        
+            
+                var html_795cc0a5226480435cbd24691b3a3833 = $(`<div id="html_795cc0a5226480435cbd24691b3a3833" style="width: 100.0%; height: 100.0%;"><b>Illes Balears</b><br>EV Registrations 2025: 4,515</div>`)[0];
+                popup_b2a3c1d132a5b3085c4d51188a0a8c47.setContent(html_795cc0a5226480435cbd24691b3a3833);
+            
+        
+
+        circle_marker_3aeff3cd45799ef54d4cdfff9e63f563.bindPopup(popup_b2a3c1d132a5b3085c4d51188a0a8c47)
+        ;
+
+        
+    
+    
+            circle_marker_3aeff3cd45799ef54d4cdfff9e63f563.bindTooltip(
+                `<div>
+                     Illes Balears — 4,515 EVs
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var circle_marker_9ecbf0152ec3a38c417d9402bb31ecb8 = L.circleMarker(
+                [37.78, -3.785],
+                {"bubblingMouseEvents": true, "color": "#08306b", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#4292c6", "fillOpacity": 0.75, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 5.380598971463144, "stroke": true, "weight": 1}
+            ).addTo(map_c5de23e43d497085ccb9dedb26939a51);
+        
+    
+        var popup_91b1fcbfd17256190729bd685b06b2f5 = L.popup({
+  "maxWidth": 230,
+});
+
+        
+            
+                var html_43cbf7e956977357bc180e3033958a5d = $(`<div id="html_43cbf7e956977357bc180e3033958a5d" style="width: 100.0%; height: 100.0%;"><b>Jaén</b><br>EV Registrations 2025: 674</div>`)[0];
+                popup_91b1fcbfd17256190729bd685b06b2f5.setContent(html_43cbf7e956977357bc180e3033958a5d);
+            
+        
+
+        circle_marker_9ecbf0152ec3a38c417d9402bb31ecb8.bindPopup(popup_91b1fcbfd17256190729bd685b06b2f5)
+        ;
+
+        
+    
+    
+            circle_marker_9ecbf0152ec3a38c417d9402bb31ecb8.bindTooltip(
+                `<div>
+                     Jaén — 674 EVs
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var circle_marker_d6b3ee47c25fa7098518f0af09b598b1 = L.circleMarker(
+                [41.615, 0.627],
+                {"bubblingMouseEvents": true, "color": "#08306b", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#4292c6", "fillOpacity": 0.75, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 5.549440354946052, "stroke": true, "weight": 1}
+            ).addTo(map_c5de23e43d497085ccb9dedb26939a51);
+        
+    
+        var popup_b2f5f8006b8f492552eb2b19696fb72d = L.popup({
+  "maxWidth": 230,
+});
+
+        
+            
+                var html_04dcdbd84485ed6d18eebafcde15891a = $(`<div id="html_04dcdbd84485ed6d18eebafcde15891a" style="width: 100.0%; height: 100.0%;"><b>Lleida</b><br>EV Registrations 2025: 973</div>`)[0];
+                popup_b2f5f8006b8f492552eb2b19696fb72d.setContent(html_04dcdbd84485ed6d18eebafcde15891a);
+            
+        
+
+        circle_marker_d6b3ee47c25fa7098518f0af09b598b1.bindPopup(popup_b2f5f8006b8f492552eb2b19696fb72d)
+        ;
+
+        
+    
+    
+            circle_marker_d6b3ee47c25fa7098518f0af09b598b1.bindTooltip(
+                `<div>
+                     Lleida — 973 EVs
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var circle_marker_5d1c41afe94e820bfb35b4ac291d0655 = L.circleMarker(
+                [42.599, -5.572],
+                {"bubblingMouseEvents": true, "color": "#08306b", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#4292c6", "fillOpacity": 0.75, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 5.287990319653121, "stroke": true, "weight": 1}
+            ).addTo(map_c5de23e43d497085ccb9dedb26939a51);
+        
+    
+        var popup_664e64281f791ed56d77c9c0f59bc914 = L.popup({
+  "maxWidth": 230,
+});
+
+        
+            
+                var html_663d82dd1b3dd050a46a82ca84cca1bf = $(`<div id="html_663d82dd1b3dd050a46a82ca84cca1bf" style="width: 100.0%; height: 100.0%;"><b>León</b><br>EV Registrations 2025: 510</div>`)[0];
+                popup_664e64281f791ed56d77c9c0f59bc914.setContent(html_663d82dd1b3dd050a46a82ca84cca1bf);
+            
+        
+
+        circle_marker_5d1c41afe94e820bfb35b4ac291d0655.bindPopup(popup_664e64281f791ed56d77c9c0f59bc914)
+        ;
+
+        
+    
+    
+            circle_marker_5d1c41afe94e820bfb35b4ac291d0655.bindTooltip(
+                `<div>
+                     León — 510 EVs
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var circle_marker_3ababad4525386dd4984e2447893ff55 = L.circleMarker(
+                [42.287, -2.54],
+                {"bubblingMouseEvents": true, "color": "#08306b", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#4292c6", "fillOpacity": 0.75, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 5.26879096500958, "stroke": true, "weight": 1}
+            ).addTo(map_c5de23e43d497085ccb9dedb26939a51);
+        
+    
+        var popup_0476299f5f5f65cde06812d41c00249a = L.popup({
+  "maxWidth": 230,
+});
+
+        
+            
+                var html_36b88959b620022bbc61b622e7fcb511 = $(`<div id="html_36b88959b620022bbc61b622e7fcb511" style="width: 100.0%; height: 100.0%;"><b>La Rioja</b><br>EV Registrations 2025: 476</div>`)[0];
+                popup_0476299f5f5f65cde06812d41c00249a.setContent(html_36b88959b620022bbc61b622e7fcb511);
+            
+        
+
+        circle_marker_3ababad4525386dd4984e2447893ff55.bindPopup(popup_0476299f5f5f65cde06812d41c00249a)
+        ;
+
+        
+    
+    
+            circle_marker_3ababad4525386dd4984e2447893ff55.bindTooltip(
+                `<div>
+                     La Rioja — 476 EVs
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var circle_marker_a1f5cee86374cc0973b6a3931e699d82 = L.circleMarker(
+                [43.012, -7.556],
+                {"bubblingMouseEvents": true, "color": "#08306b", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#4292c6", "fillOpacity": 0.75, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 5.339941514570938, "stroke": true, "weight": 1}
+            ).addTo(map_c5de23e43d497085ccb9dedb26939a51);
+        
+    
+        var popup_805daed3d0ac144d33c3fd8a51550e45 = L.popup({
+  "maxWidth": 230,
+});
+
+        
+            
+                var html_812b1ce9e61dcf1d90a3a29b562ce685 = $(`<div id="html_812b1ce9e61dcf1d90a3a29b562ce685" style="width: 100.0%; height: 100.0%;"><b>Lugo</b><br>EV Registrations 2025: 602</div>`)[0];
+                popup_805daed3d0ac144d33c3fd8a51550e45.setContent(html_812b1ce9e61dcf1d90a3a29b562ce685);
+            
+        
+
+        circle_marker_a1f5cee86374cc0973b6a3931e699d82.bindPopup(popup_805daed3d0ac144d33c3fd8a51550e45)
+        ;
+
+        
+    
+    
+            circle_marker_a1f5cee86374cc0973b6a3931e699d82.bindTooltip(
+                `<div>
+                     Lugo — 602 EVs
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var circle_marker_3fca13b23c64ab0be8a550ac6880af55 = L.circleMarker(
+                [40.417, -3.704],
+                {"bubblingMouseEvents": true, "color": "#08306b", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#4292c6", "fillOpacity": 0.75, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 33.0, "stroke": true, "weight": 1}
+            ).addTo(map_c5de23e43d497085ccb9dedb26939a51);
+        
+    
+        var popup_0c8f47b1f78aee5215c6b5d012555f4c = L.popup({
+  "maxWidth": 230,
+});
+
+        
+            
+                var html_e95c0f139d94b2a87976ce3048a9ff92 = $(`<div id="html_e95c0f139d94b2a87976ce3048a9ff92" style="width: 100.0%; height: 100.0%;"><b>Madrid</b><br>EV Registrations 2025: 49,585</div>`)[0];
+                popup_0c8f47b1f78aee5215c6b5d012555f4c.setContent(html_e95c0f139d94b2a87976ce3048a9ff92);
+            
+        
+
+        circle_marker_3fca13b23c64ab0be8a550ac6880af55.bindPopup(popup_0c8f47b1f78aee5215c6b5d012555f4c)
+        ;
+
+        
+    
+    
+            circle_marker_3fca13b23c64ab0be8a550ac6880af55.bindTooltip(
+                `<div>
+                     Madrid — 49,585 EVs
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var circle_marker_18fb1abab219bd9499c8234c144bc07d = L.circleMarker(
+                [36.721, -4.421],
+                {"bubblingMouseEvents": true, "color": "#08306b", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#4292c6", "fillOpacity": 0.75, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 7.616759100534436, "stroke": true, "weight": 1}
+            ).addTo(map_c5de23e43d497085ccb9dedb26939a51);
+        
+    
+        var popup_c6749aa352e1350fa6494dccd9d91233 = L.popup({
+  "maxWidth": 230,
+});
+
+        
+            
+                var html_ac58c52bf279ad818774d986b392966a = $(`<div id="html_ac58c52bf279ad818774d986b392966a" style="width: 100.0%; height: 100.0%;"><b>Málaga</b><br>EV Registrations 2025: 4,634</div>`)[0];
+                popup_c6749aa352e1350fa6494dccd9d91233.setContent(html_ac58c52bf279ad818774d986b392966a);
+            
+        
+
+        circle_marker_18fb1abab219bd9499c8234c144bc07d.bindPopup(popup_c6749aa352e1350fa6494dccd9d91233)
+        ;
+
+        
+    
+    
+            circle_marker_18fb1abab219bd9499c8234c144bc07d.bindTooltip(
+                `<div>
+                     Málaga — 4,634 EVs
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var circle_marker_b1034d37e98e0f99fb6e47698c255e5a = L.circleMarker(
+                [37.992, -1.131],
+                {"bubblingMouseEvents": true, "color": "#08306b", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#4292c6", "fillOpacity": 0.75, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 6.481738428960371, "stroke": true, "weight": 1}
+            ).addTo(map_c5de23e43d497085ccb9dedb26939a51);
+        
+    
+        var popup_d50f5f2757f96009bac33452045bd46e = L.popup({
+  "maxWidth": 230,
+});
+
+        
+            
+                var html_9b9688af33c84a68997a90cbcf843d15 = $(`<div id="html_9b9688af33c84a68997a90cbcf843d15" style="width: 100.0%; height: 100.0%;"><b>Murcia</b><br>EV Registrations 2025: 2,624</div>`)[0];
+                popup_d50f5f2757f96009bac33452045bd46e.setContent(html_9b9688af33c84a68997a90cbcf843d15);
+            
+        
+
+        circle_marker_b1034d37e98e0f99fb6e47698c255e5a.bindPopup(popup_d50f5f2757f96009bac33452045bd46e)
+        ;
+
+        
+    
+    
+            circle_marker_b1034d37e98e0f99fb6e47698c255e5a.bindTooltip(
+                `<div>
+                     Murcia — 2,624 EVs
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var circle_marker_62ea57b0f2bdf142a9b714993f6b7341 = L.circleMarker(
+                [42.817, -1.643],
+                {"bubblingMouseEvents": true, "color": "#08306b", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#4292c6", "fillOpacity": 0.75, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 6.057093879197338, "stroke": true, "weight": 1}
+            ).addTo(map_c5de23e43d497085ccb9dedb26939a51);
+        
+    
+        var popup_892c188f0397737b3b148214cc9951c0 = L.popup({
+  "maxWidth": 230,
+});
+
+        
+            
+                var html_0d3150f49bdb8f02500cd5c55b3375b7 = $(`<div id="html_0d3150f49bdb8f02500cd5c55b3375b7" style="width: 100.0%; height: 100.0%;"><b>Navarra</b><br>EV Registrations 2025: 1,872</div>`)[0];
+                popup_892c188f0397737b3b148214cc9951c0.setContent(html_0d3150f49bdb8f02500cd5c55b3375b7);
+            
+        
+
+        circle_marker_62ea57b0f2bdf142a9b714993f6b7341.bindPopup(popup_892c188f0397737b3b148214cc9951c0)
+        ;
+
+        
+    
+    
+            circle_marker_62ea57b0f2bdf142a9b714993f6b7341.bindTooltip(
+                `<div>
+                     Navarra — 1,872 EVs
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var circle_marker_27255eeeb3d31f52c429127181f138ed = L.circleMarker(
+                [43.361, -5.859],
+                {"bubblingMouseEvents": true, "color": "#08306b", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#4292c6", "fillOpacity": 0.75, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 5.946979933447615, "stroke": true, "weight": 1}
+            ).addTo(map_c5de23e43d497085ccb9dedb26939a51);
+        
+    
+        var popup_58ce3b1585185b1ba3cf1600c835ace3 = L.popup({
+  "maxWidth": 230,
+});
+
+        
+            
+                var html_0b489004c7c36413729e6ac3eac596c7 = $(`<div id="html_0b489004c7c36413729e6ac3eac596c7" style="width: 100.0%; height: 100.0%;"><b>Asturias</b><br>EV Registrations 2025: 1,677</div>`)[0];
+                popup_58ce3b1585185b1ba3cf1600c835ace3.setContent(html_0b489004c7c36413729e6ac3eac596c7);
+            
+        
+
+        circle_marker_27255eeeb3d31f52c429127181f138ed.bindPopup(popup_58ce3b1585185b1ba3cf1600c835ace3)
+        ;
+
+        
+    
+    
+            circle_marker_27255eeeb3d31f52c429127181f138ed.bindTooltip(
+                `<div>
+                     Asturias — 1,677 EVs
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var circle_marker_4b344ab39c687f062586d78b110875b7 = L.circleMarker(
+                [41.993, -4.531],
+                {"bubblingMouseEvents": true, "color": "#08306b", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#4292c6", "fillOpacity": 0.75, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 5.077926792376727, "stroke": true, "weight": 1}
+            ).addTo(map_c5de23e43d497085ccb9dedb26939a51);
+        
+    
+        var popup_c5e1e3e292e213b79a61a48b136659e7 = L.popup({
+  "maxWidth": 230,
+});
+
+        
+            
+                var html_e6e54439522e696d97a72d727c5a2757 = $(`<div id="html_e6e54439522e696d97a72d727c5a2757" style="width: 100.0%; height: 100.0%;"><b>Palencia</b><br>EV Registrations 2025: 138</div>`)[0];
+                popup_c5e1e3e292e213b79a61a48b136659e7.setContent(html_e6e54439522e696d97a72d727c5a2757);
+            
+        
+
+        circle_marker_4b344ab39c687f062586d78b110875b7.bindPopup(popup_c5e1e3e292e213b79a61a48b136659e7)
+        ;
+
+        
+    
+    
+            circle_marker_4b344ab39c687f062586d78b110875b7.bindTooltip(
+                `<div>
+                     Palencia — 138 EVs
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var circle_marker_6db42a6642fd0bde7c28e02c33c9972e = L.circleMarker(
+                [42.43, -8.645],
+                {"bubblingMouseEvents": true, "color": "#08306b", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#4292c6", "fillOpacity": 0.75, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 5.845336291217102, "stroke": true, "weight": 1}
+            ).addTo(map_c5de23e43d497085ccb9dedb26939a51);
+        
+    
+        var popup_ab5bdca4b844a94a234d256f49642ba6 = L.popup({
+  "maxWidth": 230,
+});
+
+        
+            
+                var html_5b53d1f917f2b95ab26aee49db8e478c = $(`<div id="html_5b53d1f917f2b95ab26aee49db8e478c" style="width: 100.0%; height: 100.0%;"><b>Pontevedra</b><br>EV Registrations 2025: 1,497</div>`)[0];
+                popup_ab5bdca4b844a94a234d256f49642ba6.setContent(html_5b53d1f917f2b95ab26aee49db8e478c);
+            
+        
+
+        circle_marker_6db42a6642fd0bde7c28e02c33c9972e.bindPopup(popup_ab5bdca4b844a94a234d256f49642ba6)
+        ;
+
+        
+    
+    
+            circle_marker_6db42a6642fd0bde7c28e02c33c9972e.bindTooltip(
+                `<div>
+                     Pontevedra — 1,497 EVs
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var circle_marker_1a5b05672b9d283a3a06eed60f6554f4 = L.circleMarker(
+                [40.97, -5.664],
+                {"bubblingMouseEvents": true, "color": "#08306b", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#4292c6", "fillOpacity": 0.75, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 5.207240092769991, "stroke": true, "weight": 1}
+            ).addTo(map_c5de23e43d497085ccb9dedb26939a51);
+        
+    
+        var popup_1600606888f5f83d316f7df9c483581d = L.popup({
+  "maxWidth": 230,
+});
+
+        
+            
+                var html_02484895d0cd538e25da1cbf1ce280aa = $(`<div id="html_02484895d0cd538e25da1cbf1ce280aa" style="width: 100.0%; height: 100.0%;"><b>Salamanca</b><br>EV Registrations 2025: 367</div>`)[0];
+                popup_1600606888f5f83d316f7df9c483581d.setContent(html_02484895d0cd538e25da1cbf1ce280aa);
+            
+        
+
+        circle_marker_1a5b05672b9d283a3a06eed60f6554f4.bindPopup(popup_1600606888f5f83d316f7df9c483581d)
+        ;
+
+        
+    
+    
+            circle_marker_1a5b05672b9d283a3a06eed60f6554f4.bindTooltip(
+                `<div>
+                     Salamanca — 367 EVs
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var circle_marker_450aa51c6b30e32a584f24ff26a0c41a = L.circleMarker(
+                [37.389, -5.984],
+                {"bubblingMouseEvents": true, "color": "#08306b", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#4292c6", "fillOpacity": 0.75, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 6.5353836845820314, "stroke": true, "weight": 1}
+            ).addTo(map_c5de23e43d497085ccb9dedb26939a51);
+        
+    
+        var popup_a059b3b6716089bb7c53fe4912aa22c9 = L.popup({
+  "maxWidth": 230,
+});
+
+        
+            
+                var html_95d13c4d3919236685ad66358b0b0c36 = $(`<div id="html_95d13c4d3919236685ad66358b0b0c36" style="width: 100.0%; height: 100.0%;"><b>Sevilla</b><br>EV Registrations 2025: 2,719</div>`)[0];
+                popup_a059b3b6716089bb7c53fe4912aa22c9.setContent(html_95d13c4d3919236685ad66358b0b0c36);
+            
+        
+
+        circle_marker_450aa51c6b30e32a584f24ff26a0c41a.bindPopup(popup_a059b3b6716089bb7c53fe4912aa22c9)
+        ;
+
+        
+    
+    
+            circle_marker_450aa51c6b30e32a584f24ff26a0c41a.bindTooltip(
+                `<div>
+                     Sevilla — 2,719 EVs
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var circle_marker_0d33e24377932241d0cf17a4135616ef = L.circleMarker(
+                [40.943, -4.109],
+                {"bubblingMouseEvents": true, "color": "#08306b", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#4292c6", "fillOpacity": 0.75, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 5.124231118281738, "stroke": true, "weight": 1}
+            ).addTo(map_c5de23e43d497085ccb9dedb26939a51);
+        
+    
+        var popup_9b603380d6ae026f4b2453a7971d1cbb = L.popup({
+  "maxWidth": 230,
+});
+
+        
+            
+                var html_be0cb106289fadf68d87b52f921d336d = $(`<div id="html_be0cb106289fadf68d87b52f921d336d" style="width: 100.0%; height: 100.0%;"><b>Segovia</b><br>EV Registrations 2025: 220</div>`)[0];
+                popup_9b603380d6ae026f4b2453a7971d1cbb.setContent(html_be0cb106289fadf68d87b52f921d336d);
+            
+        
+
+        circle_marker_0d33e24377932241d0cf17a4135616ef.bindPopup(popup_9b603380d6ae026f4b2453a7971d1cbb)
+        ;
+
+        
+    
+    
+            circle_marker_0d33e24377932241d0cf17a4135616ef.bindTooltip(
+                `<div>
+                     Segovia — 220 EVs
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var circle_marker_16bb8b187c573dc8e443d3bf9e69248a = L.circleMarker(
+                [41.763, -2.466],
+                {"bubblingMouseEvents": true, "color": "#08306b", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#4292c6", "fillOpacity": 0.75, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 5.06268024604215, "stroke": true, "weight": 1}
+            ).addTo(map_c5de23e43d497085ccb9dedb26939a51);
+        
+    
+        var popup_3ae3dde82c62ec391d9edf800d4cddd8 = L.popup({
+  "maxWidth": 230,
+});
+
+        
+            
+                var html_5ab78cd7c4ebfbb78b03dfc35f9ef401 = $(`<div id="html_5ab78cd7c4ebfbb78b03dfc35f9ef401" style="width: 100.0%; height: 100.0%;"><b>Soria</b><br>EV Registrations 2025: 111</div>`)[0];
+                popup_3ae3dde82c62ec391d9edf800d4cddd8.setContent(html_5ab78cd7c4ebfbb78b03dfc35f9ef401);
+            
+        
+
+        circle_marker_16bb8b187c573dc8e443d3bf9e69248a.bindPopup(popup_3ae3dde82c62ec391d9edf800d4cddd8)
+        ;
+
+        
+    
+    
+            circle_marker_16bb8b187c573dc8e443d3bf9e69248a.bindTooltip(
+                `<div>
+                     Soria — 111 EVs
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var circle_marker_449a81845b216184e3b26e0af9cf9349 = L.circleMarker(
+                [43.309, -2.003],
+                {"bubblingMouseEvents": true, "color": "#08306b", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#4292c6", "fillOpacity": 0.75, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 5.551134415649894, "stroke": true, "weight": 1}
+            ).addTo(map_c5de23e43d497085ccb9dedb26939a51);
+        
+    
+        var popup_9c271c663863bfa0aa80eddd0d0589f7 = L.popup({
+  "maxWidth": 230,
+});
+
+        
+            
+                var html_08ec121c75f909770ebc1537ffbcb242 = $(`<div id="html_08ec121c75f909770ebc1537ffbcb242" style="width: 100.0%; height: 100.0%;"><b>Gipuzkoa</b><br>EV Registrations 2025: 976</div>`)[0];
+                popup_9c271c663863bfa0aa80eddd0d0589f7.setContent(html_08ec121c75f909770ebc1537ffbcb242);
+            
+        
+
+        circle_marker_449a81845b216184e3b26e0af9cf9349.bindPopup(popup_9c271c663863bfa0aa80eddd0d0589f7)
+        ;
+
+        
+    
+    
+            circle_marker_449a81845b216184e3b26e0af9cf9349.bindTooltip(
+                `<div>
+                     Gipuzkoa — 976 EVs
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var circle_marker_6c7e30df292523f7d974738ea0804d3e = L.circleMarker(
+                [41.119, 1.245],
+                {"bubblingMouseEvents": true, "color": "#08306b", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#4292c6", "fillOpacity": 0.75, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 6.181324997479076, "stroke": true, "weight": 1}
+            ).addTo(map_c5de23e43d497085ccb9dedb26939a51);
+        
+    
+        var popup_821c36bce4efc3db9cbc196b48b21c00 = L.popup({
+  "maxWidth": 230,
+});
+
+        
+            
+                var html_f3d48014c954e5782257c175d38e95d0 = $(`<div id="html_f3d48014c954e5782257c175d38e95d0" style="width: 100.0%; height: 100.0%;"><b>Tarragona</b><br>EV Registrations 2025: 2,092</div>`)[0];
+                popup_821c36bce4efc3db9cbc196b48b21c00.setContent(html_f3d48014c954e5782257c175d38e95d0);
+            
+        
+
+        circle_marker_6c7e30df292523f7d974738ea0804d3e.bindPopup(popup_821c36bce4efc3db9cbc196b48b21c00)
+        ;
+
+        
+    
+    
+            circle_marker_6c7e30df292523f7d974738ea0804d3e.bindTooltip(
+                `<div>
+                     Tarragona — 2,092 EVs
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var circle_marker_b5ac3ffc4a8845309bd414fee429b43a = L.circleMarker(
+                [40.346, -1.106],
+                {"bubblingMouseEvents": true, "color": "#08306b", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#4292c6", "fillOpacity": 0.75, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 5.069456488857518, "stroke": true, "weight": 1}
+            ).addTo(map_c5de23e43d497085ccb9dedb26939a51);
+        
+    
+        var popup_44bfe9558f1607b4b1c255ab6bd71c66 = L.popup({
+  "maxWidth": 230,
+});
+
+        
+            
+                var html_dfdd166d1442da4f6927a7ae53617510 = $(`<div id="html_dfdd166d1442da4f6927a7ae53617510" style="width: 100.0%; height: 100.0%;"><b>Teruel</b><br>EV Registrations 2025: 123</div>`)[0];
+                popup_44bfe9558f1607b4b1c255ab6bd71c66.setContent(html_dfdd166d1442da4f6927a7ae53617510);
+            
+        
+
+        circle_marker_b5ac3ffc4a8845309bd414fee429b43a.bindPopup(popup_44bfe9558f1607b4b1c255ab6bd71c66)
+        ;
+
+        
+    
+    
+            circle_marker_b5ac3ffc4a8845309bd414fee429b43a.bindTooltip(
+                `<div>
+                     Teruel — 123 EVs
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var circle_marker_cba9d4bb47d5ea241933991c0f6866b1 = L.circleMarker(
+                [28.464, -16.252],
+                {"bubblingMouseEvents": true, "color": "#08306b", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#4292c6", "fillOpacity": 0.75, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 6.063305435111425, "stroke": true, "weight": 1}
+            ).addTo(map_c5de23e43d497085ccb9dedb26939a51);
+        
+    
+        var popup_8993406154d7757a9fe97b66830611a7 = L.popup({
+  "maxWidth": 230,
+});
+
+        
+            
+                var html_dfe11a745dc857b219f71478c1dd3526 = $(`<div id="html_dfe11a745dc857b219f71478c1dd3526" style="width: 100.0%; height: 100.0%;"><b>S.C. Tenerife</b><br>EV Registrations 2025: 1,883</div>`)[0];
+                popup_8993406154d7757a9fe97b66830611a7.setContent(html_dfe11a745dc857b219f71478c1dd3526);
+            
+        
+
+        circle_marker_cba9d4bb47d5ea241933991c0f6866b1.bindPopup(popup_8993406154d7757a9fe97b66830611a7)
+        ;
+
+        
+    
+    
+            circle_marker_cba9d4bb47d5ea241933991c0f6866b1.bindTooltip(
+                `<div>
+                     S.C. Tenerife — 1,883 EVs
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var circle_marker_e321e7877e0b424b8248936d42e858cf = L.circleMarker(
+                [39.863, -4.027],
+                {"bubblingMouseEvents": true, "color": "#08306b", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#4292c6", "fillOpacity": 0.75, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 6.330402339417162, "stroke": true, "weight": 1}
+            ).addTo(map_c5de23e43d497085ccb9dedb26939a51);
+        
+    
+        var popup_8f2addec1e869fbbe57bc42f19421f54 = L.popup({
+  "maxWidth": 230,
+});
+
+        
+            
+                var html_5bb7a40b65d477c7ae1018c9ebf1941d = $(`<div id="html_5bb7a40b65d477c7ae1018c9ebf1941d" style="width: 100.0%; height: 100.0%;"><b>Toledo</b><br>EV Registrations 2025: 2,356</div>`)[0];
+                popup_8f2addec1e869fbbe57bc42f19421f54.setContent(html_5bb7a40b65d477c7ae1018c9ebf1941d);
+            
+        
+
+        circle_marker_e321e7877e0b424b8248936d42e858cf.bindPopup(popup_8f2addec1e869fbbe57bc42f19421f54)
+        ;
+
+        
+    
+    
+            circle_marker_e321e7877e0b424b8248936d42e858cf.bindTooltip(
+                `<div>
+                     Toledo — 2,356 EVs
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var circle_marker_b06cb3690eecb1536cce2e9a92fb5577 = L.circleMarker(
+                [39.47, -0.376],
+                {"bubblingMouseEvents": true, "color": "#08306b", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#4292c6", "fillOpacity": 0.75, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 10.107593022083291, "stroke": true, "weight": 1}
+            ).addTo(map_c5de23e43d497085ccb9dedb26939a51);
+        
+    
+        var popup_2aebbfbc685bd8a76b09bf584f91f796 = L.popup({
+  "maxWidth": 230,
+});
+
+        
+            
+                var html_d2d9913ad5fded8f27f63459b5779182 = $(`<div id="html_d2d9913ad5fded8f27f63459b5779182" style="width: 100.0%; height: 100.0%;"><b>Valencia</b><br>EV Registrations 2025: 9,045</div>`)[0];
+                popup_2aebbfbc685bd8a76b09bf584f91f796.setContent(html_d2d9913ad5fded8f27f63459b5779182);
+            
+        
+
+        circle_marker_b06cb3690eecb1536cce2e9a92fb5577.bindPopup(popup_2aebbfbc685bd8a76b09bf584f91f796)
+        ;
+
+        
+    
+    
+            circle_marker_b06cb3690eecb1536cce2e9a92fb5577.bindTooltip(
+                `<div>
+                     Valencia — 9,045 EVs
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var circle_marker_ab3fade72254c1440651dfbb0bb14ee3 = L.circleMarker(
+                [41.652, -4.724],
+                {"bubblingMouseEvents": true, "color": "#08306b", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#4292c6", "fillOpacity": 0.75, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 5.504830089744883, "stroke": true, "weight": 1}
+            ).addTo(map_c5de23e43d497085ccb9dedb26939a51);
+        
+    
+        var popup_a35a8394948a21e53302d17d404bac32 = L.popup({
+  "maxWidth": 230,
+});
+
+        
+            
+                var html_f70c3e7712135cc43cf055d2a6baeb45 = $(`<div id="html_f70c3e7712135cc43cf055d2a6baeb45" style="width: 100.0%; height: 100.0%;"><b>Valladolid</b><br>EV Registrations 2025: 894</div>`)[0];
+                popup_a35a8394948a21e53302d17d404bac32.setContent(html_f70c3e7712135cc43cf055d2a6baeb45);
+            
+        
+
+        circle_marker_ab3fade72254c1440651dfbb0bb14ee3.bindPopup(popup_a35a8394948a21e53302d17d404bac32)
+        ;
+
+        
+    
+    
+            circle_marker_ab3fade72254c1440651dfbb0bb14ee3.bindTooltip(
+                `<div>
+                     Valladolid — 894 EVs
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var circle_marker_9434b545f115ff7ceee133b36dab2bcf = L.circleMarker(
+                [42.846, -2.673],
+                {"bubblingMouseEvents": true, "color": "#08306b", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#4292c6", "fillOpacity": 0.75, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 5.426338610466875, "stroke": true, "weight": 1}
+            ).addTo(map_c5de23e43d497085ccb9dedb26939a51);
+        
+    
+        var popup_2d52b4df8ce975b41ce95889e9ce8c6c = L.popup({
+  "maxWidth": 230,
+});
+
+        
+            
+                var html_b5138efc7ce5d68bf5b3df499c7a07d8 = $(`<div id="html_b5138efc7ce5d68bf5b3df499c7a07d8" style="width: 100.0%; height: 100.0%;"><b>Araba/Álava</b><br>EV Registrations 2025: 755</div>`)[0];
+                popup_2d52b4df8ce975b41ce95889e9ce8c6c.setContent(html_b5138efc7ce5d68bf5b3df499c7a07d8);
+            
+        
+
+        circle_marker_9434b545f115ff7ceee133b36dab2bcf.bindPopup(popup_2d52b4df8ce975b41ce95889e9ce8c6c)
+        ;
+
+        
+    
+    
+            circle_marker_9434b545f115ff7ceee133b36dab2bcf.bindTooltip(
+                `<div>
+                     Araba/Álava — 755 EVs
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var circle_marker_a2e29f9a7b6fe94ba4c7f597e360fcdd = L.circleMarker(
+                [41.649, -0.889],
+                {"bubblingMouseEvents": true, "color": "#08306b", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#4292c6", "fillOpacity": 0.75, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 5.880346879096501, "stroke": true, "weight": 1}
+            ).addTo(map_c5de23e43d497085ccb9dedb26939a51);
+        
+    
+        var popup_cd3ab8d1a59ea8e396faefb05eea9420 = L.popup({
+  "maxWidth": 230,
+});
+
+        
+            
+                var html_03c23ecf855eb38f1c46f7ff2cf70c52 = $(`<div id="html_03c23ecf855eb38f1c46f7ff2cf70c52" style="width: 100.0%; height: 100.0%;"><b>Zaragoza</b><br>EV Registrations 2025: 1,559</div>`)[0];
+                popup_cd3ab8d1a59ea8e396faefb05eea9420.setContent(html_03c23ecf855eb38f1c46f7ff2cf70c52);
+            
+        
+
+        circle_marker_a2e29f9a7b6fe94ba4c7f597e360fcdd.bindPopup(popup_cd3ab8d1a59ea8e396faefb05eea9420)
+        ;
+
+        
+    
+    
+            circle_marker_a2e29f9a7b6fe94ba4c7f597e360fcdd.bindTooltip(
+                `<div>
+                     Zaragoza — 1,559 EVs
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var circle_marker_76daf3b34c9ebaf16432cccb3fcfc151 = L.circleMarker(
+                [41.5, -5.746],
+                {"bubblingMouseEvents": true, "color": "#08306b", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#4292c6", "fillOpacity": 0.75, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 5.089220530402339, "stroke": true, "weight": 1}
+            ).addTo(map_c5de23e43d497085ccb9dedb26939a51);
+        
+    
+        var popup_c9d99ac45e283e8864a33aaf431905fc = L.popup({
+  "maxWidth": 230,
+});
+
+        
+            
+                var html_d6ab7ff3dd41e0a518eb1698e5ee55ec = $(`<div id="html_d6ab7ff3dd41e0a518eb1698e5ee55ec" style="width: 100.0%; height: 100.0%;"><b>Zamora</b><br>EV Registrations 2025: 158</div>`)[0];
+                popup_c9d99ac45e283e8864a33aaf431905fc.setContent(html_d6ab7ff3dd41e0a518eb1698e5ee55ec);
+            
+        
+
+        circle_marker_76daf3b34c9ebaf16432cccb3fcfc151.bindPopup(popup_c9d99ac45e283e8864a33aaf431905fc)
+        ;
+
+        
+    
+    
+            circle_marker_76daf3b34c9ebaf16432cccb3fcfc151.bindTooltip(
+                `<div>
+                     Zamora — 158 EVs
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var heat_map_32e1744a22ac0418433c4a789b4c33e7 = L.heatLayer(
+                [[38.504, -0.324, 5461], [38.996, -1.858, 444], [37.004, -2.097, 921], [40.656, -4.697, 195], [41.582, 2.173, 17218], [38.879, -6.971, 795], [43.263, -2.935, 2004], [42.344, -3.697, 484], [43.132, -8.414, 1852], [36.516, -5.903, 1573], [39.475, -6.372, 343], [35.889, -5.321, 66], [37.885, -4.779, 761], [39.003, -3.917, 477], [39.986, -0.051, 1256], [40.07, -2.137, 216], [28.123, -15.436, 2880], [37.177, -3.599, 1482], [40.632, -3.167, 779], [37.261, -6.945, 514], [42.136, -0.409, 343], [39.569, 2.65, 4515], [37.78, -3.785, 674], [41.615, 0.627, 973], [42.599, -5.572, 510], [42.287, -2.54, 476], [43.012, -7.556, 602], [40.417, -3.704, 49585], [36.721, -4.421, 4634], [37.992, -1.131, 2624], [42.817, -1.643, 1872], [43.361, -5.859, 1677], [41.993, -4.531, 138], [42.43, -8.645, 1497], [40.97, -5.664, 367], [37.389, -5.984, 2719], [40.943, -4.109, 220], [41.763, -2.466, 111], [43.309, -2.003, 976], [41.119, 1.245, 2092], [40.346, -1.106, 123], [28.464, -16.252, 1883], [39.863, -4.027, 2356], [39.47, -0.376, 9045], [41.652, -4.724, 894], [42.846, -2.673, 755], [41.649, -0.889, 1559], [41.5, -5.746, 158]],
+                {
+  "minOpacity": 0.3,
+  "maxZoom": 18,
+  "radius": 35,
+  "blur": 25,
+  "gradient": {
+  "0.4": "blue",
+  "0.65": "lime",
+  "1": "red",
+},
+}
+            );
+        
+    
+            heat_map_32e1744a22ac0418433c4a789b4c33e7.addTo(map_c5de23e43d497085ccb9dedb26939a51);
+        
+</script>
+</html>
