@@ -1,0 +1,919 @@
+<!DOCTYPE html>
+<html>
+<head>
+    
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+    <script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.3/dist/leaflet.js"></script>
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Leaflet.awesome-markers/2.0.2/leaflet.awesome-markers.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.3/dist/leaflet.css"/>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/css/bootstrap.min.css"/>
+    <link rel="stylesheet" href="https://netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap-glyphicons.css"/>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.2.0/css/all.min.css"/>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/Leaflet.awesome-markers/2.0.2/leaflet.awesome-markers.css"/>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/python-visualization/folium/folium/templates/leaflet.awesome.rotate.min.css"/>
+    
+            <meta name="viewport" content="width=device-width,
+                initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+            <style>
+                #map_b0e5aad1abe2efbbbc245974659dd0c1 {
+                    position: relative;
+                    width: 100.0%;
+                    height: 100.0%;
+                    left: 0.0%;
+                    top: 0.0%;
+                }
+                .leaflet-container { font-size: 1rem; }
+            </style>
+
+            <style>html, body {
+                width: 100%;
+                height: 100%;
+                margin: 0;
+                padding: 0;
+            }
+            </style>
+
+            <style>#map {
+                position:absolute;
+                top:0;
+                bottom:0;
+                right:0;
+                left:0;
+                }
+            </style>
+
+            <script>
+                L_NO_TOUCH = false;
+                L_DISABLE_3D = false;
+            </script>
+
+        
+
+<style>
+/* ── DASHBOARD LAYOUT RESET ── */
+html { height: 100% !important; overflow: hidden !important; }
+body {
+    display: flex !important;
+    flex-direction: column !important;
+    height: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow: hidden !important;
+    font-family: 'Segoe UI', Arial, sans-serif;
+    background: #f0f2f5;
+}
+
+/* ── HEADER ── */
+.db-header {
+    background: #1a1a2e;
+    color: white;
+    padding: 10px 20px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    flex-shrink: 0;
+    border-bottom: 3px solid #0f3460;
+    z-index: 2000;
+}
+.db-header-icon { font-size: 22px; flex-shrink: 0; }
+.db-header-title { font-size: 16px; font-weight: 700; letter-spacing: 0.2px; line-height: 1.3; }
+.db-header-subtitle { font-size: 11px; color: #aab4c8; margin-top: 2px; line-height: 1.3; }
+
+/* ── BODY ROW ── */
+.db-body { display: flex; flex: 1; overflow: hidden; }
+
+/* ── SIDEBAR ── */
+.db-sidebar {
+    width: 248px;
+    background: white;
+    border-right: 1px solid #dde1e7;
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+    flex-shrink: 0;
+    z-index: 1500;
+}
+.db-sidebar-section { padding: 14px 16px; border-bottom: 1px solid #eef0f3; }
+.db-sidebar-section h4 {
+    margin: 0 0 10px 0;
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.9px;
+    color: #1a1a2e;
+}
+.db-sidebar-section p {
+    font-size: 12px;
+    color: #666;
+    margin: 0;
+    line-height: 1.5;
+}
+.legend-item {
+    display: flex;
+    align-items: center;
+    font-size: 12px;
+    color: #444;
+    margin-bottom: 7px;
+    line-height: 1.4;
+}
+.leg-circle {
+    display: inline-block;
+    width: 12px; height: 12px;
+    border-radius: 50%;
+    margin-right: 8px;
+    flex-shrink: 0;
+}
+.leg-square {
+    display: inline-block;
+    width: 14px; height: 8px;
+    border-radius: 2px;
+    margin-right: 8px;
+    flex-shrink: 0;
+}
+
+/* ── MAP WRAPPER ── */
+.db-map-wrapper {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    position: relative;
+    min-width: 0;
+}
+.db-map-area {
+    flex: 1;
+    position: relative;
+    overflow: hidden;
+}
+
+/* ── MAKE FOLIUM MAP FILL THE MAP AREA ── */
+.folium-map {
+    position: absolute !important;
+    top: 0 !important; left: 0 !important;
+    right: 0 !important; bottom: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
+}
+[id^="map_"] {
+    position: absolute !important;
+    top: 0 !important; left: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
+}
+
+/* ── PLOTLY: make chart fill container ── */
+.js-plotly-plot, .plotly-graph-div, .plot-container {
+    width: 100% !important;
+    height: 100% !important;
+}
+.db-chart-area {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: auto;
+    padding: 16px;
+    background: #f8f9fb;
+}
+.db-chart-inner {
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    padding: 16px;
+    width: 100%;
+    max-width: 1100px;
+}
+
+/* ── SOURCE BAR ── */
+.db-source {
+    background: white;
+    border-top: 1px solid #dde1e7;
+    padding: 6px 16px;
+    font-size: 11px;
+    color: #888;
+    flex-shrink: 0;
+    z-index: 1500;
+}
+
+/* ── HIDE OLD FOLIUM OVERLAYS ── */
+div[style*="position:fixed"] { display: none !important; }
+</style>
+</head>
+<body>
+
+<div class="db-header">
+  <div class="db-header-icon">📍</div>
+  <div>
+    <div class="db-header-title">Vigo EV Charging Points</div>
+    <div class="db-header-subtitle">Municipal open data — public charging locations in Vigo</div>
+  </div>
+</div>
+<div class="db-body">
+  <div class="db-sidebar">
+    <div class="db-sidebar-section">
+      <h4>Legend</h4>
+      
+            <div class="legend-item">
+                <span style="color:#2ca25f;margin-right:8px;font-size:15px;flex-shrink:0;">⚡</span>
+                Public charging point
+            </div>
+            <div class="legend-item">
+                <span style="color:#2ca25f;margin-right:8px;font-size:13px;flex-shrink:0;">◯</span>
+                4 km city-centre radius
+            </div>
+            <p style="font-size:11px;color:#888;margin:8px 0 0 0;">Click any marker for address, phone, and website details.</p>
+        
+    </div>
+    <div class="db-sidebar-section">
+      <h4>Filters &amp; Notes</h4>
+      
+            <p>All public EV charging points in the municipality of Vigo as reported in the municipal open data portal.</p>
+        
+    </div>
+  </div>
+  <div class="db-map-wrapper">
+    <div class="db-map-area">
+<div style="position:fixed;top:10px;left:60px;z-index:1000;background:white;padding:8px 12px;border:2px solid #ccc;border-radius:6px;font-size:14px;font-weight:bold">⚡ Vigo EV Charging Points — Municipal Dataset [Folium]<br><span style="font-size:11px;font-weight:normal">13 public charging locations · Click for details</span></div>
+    
+            <div class="folium-map" id="map_b0e5aad1abe2efbbbc245974659dd0c1" ></div>
+        
+
+    </div>
+    <div class="db-source">📊 Source: Concello de Vigo · datos.vigo.org (ptos_recarga.geojson)</div>
+  </div>
+</div>
+</body>
+<script>
+    
+    
+            var map_b0e5aad1abe2efbbbc245974659dd0c1 = L.map(
+                "map_b0e5aad1abe2efbbbc245974659dd0c1",
+                {
+                    center: [42.225, -8.72],
+                    crs: L.CRS.EPSG3857,
+                    ...{
+  "zoom": 13,
+  "zoomControl": true,
+  "preferCanvas": false,
+}
+
+                }
+            );
+
+            
+
+        
+    
+            var tile_layer_1ba68c4043c8c1cd87c0bddff460e653 = L.tileLayer(
+                "https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png",
+                {
+  "minZoom": 0,
+  "maxZoom": 19,
+  "maxNativeZoom": 19,
+  "noWrap": false,
+  "attribution": "\u0026copy; \u003ca href=\"https://www.openstreetmap.org/copyright\"\u003eOpenStreetMap\u003c/a\u003e contributors \u0026copy; \u003ca href=\"https://carto.com/attributions\"\u003eCARTO\u003c/a\u003e",
+  "subdomains": "abc",
+  "detectRetina": false,
+  "tms": false,
+  "opacity": 1,
+}
+
+            );
+        
+    
+            tile_layer_1ba68c4043c8c1cd87c0bddff460e653.addTo(map_b0e5aad1abe2efbbbc245974659dd0c1);
+        
+    
+            var marker_9c1563ba307f4ab3045015ebf6fa7a31 = L.marker(
+                [42.22039, -8.72426],
+                {
+}
+            ).addTo(map_b0e5aad1abe2efbbbc245974659dd0c1);
+        
+    
+            var icon_1cdc4ca74921139adbd94517b5d27755 = L.AwesomeMarkers.icon(
+                {
+  "markerColor": "green",
+  "iconColor": "white",
+  "icon": "bolt",
+  "prefix": "fa",
+  "extraClasses": "fa-rotate-0",
+}
+            );
+        
+    
+        var popup_b90dea99504c9e766634ed7c5a2586cd = L.popup({
+  "maxWidth": 270,
+});
+
+        
+            
+                var html_551002d3c2d40be8d672bd58e3f0902e = $(`<div id="html_551002d3c2d40be8d672bd58e3f0902e" style="width: 100.0%; height: 100.0%;"><b>Parking Centro Comercial Gran Vía</b><br>📍 RUA MIRADOIRO (DO), FREIXEIRO<br>📮 36210<br>📞 986447500<br>🌐 <a href="http://www.granviadevigo.com" target="_blank">Website</a></div>`)[0];
+                popup_b90dea99504c9e766634ed7c5a2586cd.setContent(html_551002d3c2d40be8d672bd58e3f0902e);
+            
+        
+
+        marker_9c1563ba307f4ab3045015ebf6fa7a31.bindPopup(popup_b90dea99504c9e766634ed7c5a2586cd)
+        ;
+
+        
+    
+    
+            marker_9c1563ba307f4ab3045015ebf6fa7a31.bindTooltip(
+                `<div>
+                     Parking Centro Comercial Gran Vía
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+                marker_9c1563ba307f4ab3045015ebf6fa7a31.setIcon(icon_1cdc4ca74921139adbd94517b5d27755);
+            
+    
+            var marker_00ec63081400d5288e63f61d2314ae99 = L.marker(
+                [42.23596, -8.71962],
+                {
+}
+            ).addTo(map_b0e5aad1abe2efbbbc245974659dd0c1);
+        
+    
+            var icon_09487754ef1c43507f7724520308ebe6 = L.AwesomeMarkers.icon(
+                {
+  "markerColor": "green",
+  "iconColor": "white",
+  "icon": "bolt",
+  "prefix": "fa",
+  "extraClasses": "fa-rotate-0",
+}
+            );
+        
+    
+        var popup_a4499695ebf5ae3e770ac201b9a67e92 = L.popup({
+  "maxWidth": 270,
+});
+
+        
+            
+                var html_70af4a2e0c1b7d2579fab065af6770f8 = $(`<div id="html_70af4a2e0c1b7d2579fab065af6770f8" style="width: 100.0%; height: 100.0%;"><b>Parking Urzáiz</b><br>📍 RUA URZAIZ, VIGO<br>📮 36201<br>📞 986442339<br>🌐 <a href="http://www.eloymartranvias.com/es/urzaiz.html" target="_blank">Website</a></div>`)[0];
+                popup_a4499695ebf5ae3e770ac201b9a67e92.setContent(html_70af4a2e0c1b7d2579fab065af6770f8);
+            
+        
+
+        marker_00ec63081400d5288e63f61d2314ae99.bindPopup(popup_a4499695ebf5ae3e770ac201b9a67e92)
+        ;
+
+        
+    
+    
+            marker_00ec63081400d5288e63f61d2314ae99.bindTooltip(
+                `<div>
+                     Parking Urzáiz
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+                marker_00ec63081400d5288e63f61d2314ae99.setIcon(icon_09487754ef1c43507f7724520308ebe6);
+            
+    
+            var marker_aa6287adcbfe588ffe468eda89d0a8f7 = L.marker(
+                [42.23953, -8.7186],
+                {
+}
+            ).addTo(map_b0e5aad1abe2efbbbc245974659dd0c1);
+        
+    
+            var icon_c18a8441733fcb321a2dbee87dc5c29d = L.AwesomeMarkers.icon(
+                {
+  "markerColor": "green",
+  "iconColor": "white",
+  "icon": "bolt",
+  "prefix": "fa",
+  "extraClasses": "fa-rotate-0",
+}
+            );
+        
+    
+        var popup_fad9f852ffa6bf31d4087ac30e06016d = L.popup({
+  "maxWidth": 270,
+});
+
+        
+            
+                var html_c5d4a085085aefb0aeebdf5329805407 = $(`<div id="html_c5d4a085085aefb0aeebdf5329805407" style="width: 100.0%; height: 100.0%;"><b>Parking Areal</b><br>📍 RUA AREAL<br>📮 36201<br>📞 986223225</div>`)[0];
+                popup_fad9f852ffa6bf31d4087ac30e06016d.setContent(html_c5d4a085085aefb0aeebdf5329805407);
+            
+        
+
+        marker_aa6287adcbfe588ffe468eda89d0a8f7.bindPopup(popup_fad9f852ffa6bf31d4087ac30e06016d)
+        ;
+
+        
+    
+    
+            marker_aa6287adcbfe588ffe468eda89d0a8f7.bindTooltip(
+                `<div>
+                     Parking Areal
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+                marker_aa6287adcbfe588ffe468eda89d0a8f7.setIcon(icon_c18a8441733fcb321a2dbee87dc5c29d);
+            
+    
+            var marker_fa10cb2b723d9aaae7b9e18b742516eb = L.marker(
+                [42.22535, -8.72597],
+                {
+}
+            ).addTo(map_b0e5aad1abe2efbbbc245974659dd0c1);
+        
+    
+            var icon_a1cc708278e903ac64e8adfb1ff74a96 = L.AwesomeMarkers.icon(
+                {
+  "markerColor": "green",
+  "iconColor": "white",
+  "icon": "bolt",
+  "prefix": "fa",
+  "extraClasses": "fa-rotate-0",
+}
+            );
+        
+    
+        var popup_f5f650a6a934eadcca7b038c683b8f11 = L.popup({
+  "maxWidth": 270,
+});
+
+        
+            
+                var html_8d19fa70a00174c3aaa61335d84dd0fb = $(`<div id="html_8d19fa70a00174c3aaa61335d84dd0fb" style="width: 100.0%; height: 100.0%;"><b>Parking Pintor Colmeiro</b><br>📍 RUA PINTOR COLMEIRO, VIGO<br>📮 36211<br>📞 986413419<br>🌐 <a href="http://www.eloymartranvias.com/es/colmeiro.html" target="_blank">Website</a></div>`)[0];
+                popup_f5f650a6a934eadcca7b038c683b8f11.setContent(html_8d19fa70a00174c3aaa61335d84dd0fb);
+            
+        
+
+        marker_fa10cb2b723d9aaae7b9e18b742516eb.bindPopup(popup_f5f650a6a934eadcca7b038c683b8f11)
+        ;
+
+        
+    
+    
+            marker_fa10cb2b723d9aaae7b9e18b742516eb.bindTooltip(
+                `<div>
+                     Parking Pintor Colmeiro
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+                marker_fa10cb2b723d9aaae7b9e18b742516eb.setIcon(icon_a1cc708278e903ac64e8adfb1ff74a96);
+            
+    
+            var marker_a5f54e16ec3533c089bf673eeaa9a5e6 = L.marker(
+                [42.2376, -8.72414],
+                {
+}
+            ).addTo(map_b0e5aad1abe2efbbbc245974659dd0c1);
+        
+    
+            var icon_a1316bca8ae1a20a726ab0ea4bc3edbd = L.AwesomeMarkers.icon(
+                {
+  "markerColor": "green",
+  "iconColor": "white",
+  "icon": "bolt",
+  "prefix": "fa",
+  "extraClasses": "fa-rotate-0",
+}
+            );
+        
+    
+        var popup_a038b1b8612c4db1669c3331867e652f = L.popup({
+  "maxWidth": 270,
+});
+
+        
+            
+                var html_992efa86091584efc8b4bca9fb1db965 = $(`<div id="html_992efa86091584efc8b4bca9fb1db965" style="width: 100.0%; height: 100.0%;"><b>Parking Policarpo Sanz</b><br>📍 RUA POLICARPO SANZ<br>📮 None<br>📞 986229404<br>🌐 <a href="http://www.eloymartranvias.com/es/policarpo.html" target="_blank">Website</a></div>`)[0];
+                popup_a038b1b8612c4db1669c3331867e652f.setContent(html_992efa86091584efc8b4bca9fb1db965);
+            
+        
+
+        marker_a5f54e16ec3533c089bf673eeaa9a5e6.bindPopup(popup_a038b1b8612c4db1669c3331867e652f)
+        ;
+
+        
+    
+    
+            marker_a5f54e16ec3533c089bf673eeaa9a5e6.bindTooltip(
+                `<div>
+                     Parking Policarpo Sanz
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+                marker_a5f54e16ec3533c089bf673eeaa9a5e6.setIcon(icon_a1316bca8ae1a20a726ab0ea4bc3edbd);
+            
+    
+            var marker_a40d0f6a0fdf555a09c390af5340bbcf = L.marker(
+                [42.22373, -8.73014],
+                {
+}
+            ).addTo(map_b0e5aad1abe2efbbbc245974659dd0c1);
+        
+    
+            var icon_c60df2d71ec6d46ccfd7fcbc8a3f064f = L.AwesomeMarkers.icon(
+                {
+  "markerColor": "green",
+  "iconColor": "white",
+  "icon": "bolt",
+  "prefix": "fa",
+  "extraClasses": "fa-rotate-0",
+}
+            );
+        
+    
+        var popup_a25a23c9dfaf6ab95fdcd52c01241302 = L.popup({
+  "maxWidth": 270,
+});
+
+        
+            
+                var html_3caa34cff6ad4e248d0cec248a1bbb48 = $(`<div id="html_3caa34cff6ad4e248d0cec248a1bbb48" style="width: 100.0%; height: 100.0%;"><b>Parking Independencia</b><br>📍 PRAZA INDEPENDENCIA, VIGO<br>📮 36211<br>🌐 <a href="http://www.eloymartranvias.com/es/independencia.html" target="_blank">Website</a></div>`)[0];
+                popup_a25a23c9dfaf6ab95fdcd52c01241302.setContent(html_3caa34cff6ad4e248d0cec248a1bbb48);
+            
+        
+
+        marker_a40d0f6a0fdf555a09c390af5340bbcf.bindPopup(popup_a25a23c9dfaf6ab95fdcd52c01241302)
+        ;
+
+        
+    
+    
+            marker_a40d0f6a0fdf555a09c390af5340bbcf.bindTooltip(
+                `<div>
+                     Parking Independencia
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+                marker_a40d0f6a0fdf555a09c390af5340bbcf.setIcon(icon_c60df2d71ec6d46ccfd7fcbc8a3f064f);
+            
+    
+            var marker_d64beabeb2c7b2ec1bf580dc54025876 = L.marker(
+                [42.23596, -8.71847],
+                {
+}
+            ).addTo(map_b0e5aad1abe2efbbbc245974659dd0c1);
+        
+    
+            var icon_c283a51ac4ab9bcc014dba46756e90d6 = L.AwesomeMarkers.icon(
+                {
+  "markerColor": "green",
+  "iconColor": "white",
+  "icon": "bolt",
+  "prefix": "fa",
+  "extraClasses": "fa-rotate-0",
+}
+            );
+        
+    
+        var popup_fd334e410259415115e924156cc068a7 = L.popup({
+  "maxWidth": 270,
+});
+
+        
+            
+                var html_6c5bbeeb7da5bea5ff8d2ef928a46c67 = $(`<div id="html_6c5bbeeb7da5bea5ff8d2ef928a46c67" style="width: 100.0%; height: 100.0%;"><b>Parking Praza Portugal</b><br>📍 PRAZA PORTUGAL<br>📮 None<br>🌐 <a href="http://www.empark.com" target="_blank">Website</a></div>`)[0];
+                popup_fd334e410259415115e924156cc068a7.setContent(html_6c5bbeeb7da5bea5ff8d2ef928a46c67);
+            
+        
+
+        marker_d64beabeb2c7b2ec1bf580dc54025876.bindPopup(popup_fd334e410259415115e924156cc068a7)
+        ;
+
+        
+    
+    
+            marker_d64beabeb2c7b2ec1bf580dc54025876.bindTooltip(
+                `<div>
+                     Parking Praza Portugal
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+                marker_d64beabeb2c7b2ec1bf580dc54025876.setIcon(icon_c283a51ac4ab9bcc014dba46756e90d6);
+            
+    
+            var marker_b51b746739b8c20ef54b2777621b8a3a = L.marker(
+                [42.24307, -8.69659],
+                {
+}
+            ).addTo(map_b0e5aad1abe2efbbbc245974659dd0c1);
+        
+    
+            var icon_87192747967aaaaab60300d925067214 = L.AwesomeMarkers.icon(
+                {
+  "markerColor": "green",
+  "iconColor": "white",
+  "icon": "bolt",
+  "prefix": "fa",
+  "extraClasses": "fa-rotate-0",
+}
+            );
+        
+    
+        var popup_f7518ad9591fd2b475ef18ce8423dcc8 = L.popup({
+  "maxWidth": 270,
+});
+
+        
+            
+                var html_fc18c5f484863cee8801c950033813ff = $(`<div id="html_fc18c5f484863cee8801c950033813ff" style="width: 100.0%; height: 100.0%;"><b>Centro Comercial Travesía de Vigo</b><br>📍 RUA TRAVESIA DE VIGO, VIGO<br>📮 36207<br>📞 986277908<br>🌐 <a href="https://www.cctravesia.com/" target="_blank">Website</a></div>`)[0];
+                popup_f7518ad9591fd2b475ef18ce8423dcc8.setContent(html_fc18c5f484863cee8801c950033813ff);
+            
+        
+
+        marker_b51b746739b8c20ef54b2777621b8a3a.bindPopup(popup_f7518ad9591fd2b475ef18ce8423dcc8)
+        ;
+
+        
+    
+    
+            marker_b51b746739b8c20ef54b2777621b8a3a.bindTooltip(
+                `<div>
+                     Centro Comercial Travesía de Vigo
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+                marker_b51b746739b8c20ef54b2777621b8a3a.setIcon(icon_87192747967aaaaab60300d925067214);
+            
+    
+            var marker_e04c9e8d73e999a8626214ad46339327 = L.marker(
+                [42.18974, -8.71528],
+                {
+}
+            ).addTo(map_b0e5aad1abe2efbbbc245974659dd0c1);
+        
+    
+            var icon_411dbee3656928a2d267c9d285d7b0a3 = L.AwesomeMarkers.icon(
+                {
+  "markerColor": "green",
+  "iconColor": "white",
+  "icon": "bolt",
+  "prefix": "fa",
+  "extraClasses": "fa-rotate-0",
+}
+            );
+        
+    
+        var popup_c11815735b177cc268979b54680140ac = L.popup({
+  "maxWidth": 270,
+});
+
+        
+            
+                var html_d3911d532fba4aabc81e1a195a589ca2 = $(`<div id="html_d3911d532fba4aabc81e1a195a589ca2" style="width: 100.0%; height: 100.0%;"><b>Parking interior Hospital Álvaro Cunqueiro</b><br>📍 ESTDA CLARA CAMPOAMOR, BABIO<br>📮 36212<br>📞 986811111<br>🌐 <a href="https://xxivigo.sergas.gal/Paxinas/web.aspx" target="_blank">Website</a></div>`)[0];
+                popup_c11815735b177cc268979b54680140ac.setContent(html_d3911d532fba4aabc81e1a195a589ca2);
+            
+        
+
+        marker_e04c9e8d73e999a8626214ad46339327.bindPopup(popup_c11815735b177cc268979b54680140ac)
+        ;
+
+        
+    
+    
+            marker_e04c9e8d73e999a8626214ad46339327.bindTooltip(
+                `<div>
+                     Parking interior Hospital Álvaro Cunqueiro
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+                marker_e04c9e8d73e999a8626214ad46339327.setIcon(icon_411dbee3656928a2d267c9d285d7b0a3);
+            
+    
+            var marker_4b1a111386ee0af006d1ac42163e0e93 = L.marker(
+                [42.16991, -8.67669],
+                {
+}
+            ).addTo(map_b0e5aad1abe2efbbbc245974659dd0c1);
+        
+    
+            var icon_ff7210732eaf181fbcaac5651ea8d5b2 = L.AwesomeMarkers.icon(
+                {
+  "markerColor": "green",
+  "iconColor": "white",
+  "icon": "bolt",
+  "prefix": "fa",
+  "extraClasses": "fa-rotate-0",
+}
+            );
+        
+    
+        var popup_3abd16acc2407b1fff58fb3a2ae273fd = L.popup({
+  "maxWidth": 270,
+});
+
+        
+            
+                var html_839ef79161f2f386d31afe382c533f3a = $(`<div id="html_839ef79161f2f386d31afe382c533f3a" style="width: 100.0%; height: 100.0%;"><b>Parking Escola Universitaria Filoloxía</b><br>📍 RUA CUMIEIRA (DA)<br>📮 None<br>🌐 <a href="http://www.uvigo.gal" target="_blank">Website</a></div>`)[0];
+                popup_3abd16acc2407b1fff58fb3a2ae273fd.setContent(html_839ef79161f2f386d31afe382c533f3a);
+            
+        
+
+        marker_4b1a111386ee0af006d1ac42163e0e93.bindPopup(popup_3abd16acc2407b1fff58fb3a2ae273fd)
+        ;
+
+        
+    
+    
+            marker_4b1a111386ee0af006d1ac42163e0e93.bindTooltip(
+                `<div>
+                     Parking Escola Universitaria Filoloxía
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+                marker_4b1a111386ee0af006d1ac42163e0e93.setIcon(icon_ff7210732eaf181fbcaac5651ea8d5b2);
+            
+    
+            var marker_42f1ef0a286afae52323e00390c47e29 = L.marker(
+                [42.17098, -8.68231],
+                {
+}
+            ).addTo(map_b0e5aad1abe2efbbbc245974659dd0c1);
+        
+    
+            var icon_d3628cc4afe165bc54775fcdc0138559 = L.AwesomeMarkers.icon(
+                {
+  "markerColor": "green",
+  "iconColor": "white",
+  "icon": "bolt",
+  "prefix": "fa",
+  "extraClasses": "fa-rotate-0",
+}
+            );
+        
+    
+        var popup_d225b0598e523d22bf7b9b9318ee4a54 = L.popup({
+  "maxWidth": 270,
+});
+
+        
+            
+                var html_8e813e2c0a170ec0ae55f93e4ac82613 = $(`<div id="html_8e813e2c0a170ec0ae55f93e4ac82613" style="width: 100.0%; height: 100.0%;"><b>Parking instalacións deportivas - Universidade de Vigo</b><br>📍 PRAZA ENRIC MIRALLES<br>📮 None<br>🌐 <a href="http://www.uvigo.gal" target="_blank">Website</a></div>`)[0];
+                popup_d225b0598e523d22bf7b9b9318ee4a54.setContent(html_8e813e2c0a170ec0ae55f93e4ac82613);
+            
+        
+
+        marker_42f1ef0a286afae52323e00390c47e29.bindPopup(popup_d225b0598e523d22bf7b9b9318ee4a54)
+        ;
+
+        
+    
+    
+            marker_42f1ef0a286afae52323e00390c47e29.bindTooltip(
+                `<div>
+                     Parking instalacións deportivas - Universidade de Vigo
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+                marker_42f1ef0a286afae52323e00390c47e29.setIcon(icon_d3628cc4afe165bc54775fcdc0138559);
+            
+    
+            var marker_dbdfbb2ba8c5acac0e5fbe5c73eab407 = L.marker(
+                [42.17089, -8.68596],
+                {
+}
+            ).addTo(map_b0e5aad1abe2efbbbc245974659dd0c1);
+        
+    
+            var icon_c824f13311f90c7be860fa16b298dfb0 = L.AwesomeMarkers.icon(
+                {
+  "markerColor": "green",
+  "iconColor": "white",
+  "icon": "bolt",
+  "prefix": "fa",
+  "extraClasses": "fa-rotate-0",
+}
+            );
+        
+    
+        var popup_29e88fff2b60eba1217eefc5f48c2a00 = L.popup({
+  "maxWidth": 270,
+});
+
+        
+            
+                var html_3d16bd9f6ae025e1bbb6988aadbc0ebb = $(`<div id="html_3d16bd9f6ae025e1bbb6988aadbc0ebb" style="width: 100.0%; height: 100.0%;"><b>Parking CACTI - Universidade de Vigo</b><br>📍 RUA XERACION NOS<br>📮 None<br>🌐 <a href="http://www.uvigo.gal" target="_blank">Website</a></div>`)[0];
+                popup_29e88fff2b60eba1217eefc5f48c2a00.setContent(html_3d16bd9f6ae025e1bbb6988aadbc0ebb);
+            
+        
+
+        marker_dbdfbb2ba8c5acac0e5fbe5c73eab407.bindPopup(popup_29e88fff2b60eba1217eefc5f48c2a00)
+        ;
+
+        
+    
+    
+            marker_dbdfbb2ba8c5acac0e5fbe5c73eab407.bindTooltip(
+                `<div>
+                     Parking CACTI - Universidade de Vigo
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+                marker_dbdfbb2ba8c5acac0e5fbe5c73eab407.setIcon(icon_c824f13311f90c7be860fa16b298dfb0);
+            
+    
+            var marker_287e8e19ffbdc0919fb21f3191e037ed = L.marker(
+                [42.16777, -8.68577],
+                {
+}
+            ).addTo(map_b0e5aad1abe2efbbbc245974659dd0c1);
+        
+    
+            var icon_0a19bb4f71dc3d54865ae66ceada9865 = L.AwesomeMarkers.icon(
+                {
+  "markerColor": "green",
+  "iconColor": "white",
+  "icon": "bolt",
+  "prefix": "fa",
+  "extraClasses": "fa-rotate-0",
+}
+            );
+        
+    
+        var popup_2ed08b2e1ccfa72d60125214e44f44e2 = L.popup({
+  "maxWidth": 270,
+});
+
+        
+            
+                var html_9639db32e6106f5474eccd3ed58565e6 = $(`<div id="html_9639db32e6106f5474eccd3ed58565e6" style="width: 100.0%; height: 100.0%;"><b>Parking Ciencias do Mar - Universidade de Vigo</b><br>📍 RUA FONTE DAS ABELLEIRAS<br>📮 None<br>🌐 <a href="http://www.uvigo.gal" target="_blank">Website</a></div>`)[0];
+                popup_2ed08b2e1ccfa72d60125214e44f44e2.setContent(html_9639db32e6106f5474eccd3ed58565e6);
+            
+        
+
+        marker_287e8e19ffbdc0919fb21f3191e037ed.bindPopup(popup_2ed08b2e1ccfa72d60125214e44f44e2)
+        ;
+
+        
+    
+    
+            marker_287e8e19ffbdc0919fb21f3191e037ed.bindTooltip(
+                `<div>
+                     Parking Ciencias do Mar - Universidade de Vigo
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+                marker_287e8e19ffbdc0919fb21f3191e037ed.setIcon(icon_0a19bb4f71dc3d54865ae66ceada9865);
+            
+    
+            var circle_a3c4d81a0eeb7e17b295a4a0ac520f9e = L.circle(
+                [42.225, -8.72],
+                {"bubblingMouseEvents": true, "color": "#2ca25f", "dashArray": "8", "dashOffset": null, "fill": true, "fillColor": "#2ca25f", "fillOpacity": 0.05, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 4000, "stroke": true, "weight": 2}
+            ).addTo(map_b0e5aad1abe2efbbbc245974659dd0c1);
+        
+</script>
+</html>

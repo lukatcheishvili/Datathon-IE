@@ -18,7 +18,10 @@ from pyproj import Transformer
 from pathlib import Path
 from lxml import etree
 
-OUT = Path('visualizations')
+# Robust Pathing
+BASE_DIR = Path(__file__).parent.resolve()
+DATA_DIR = BASE_DIR / "data"
+OUT = BASE_DIR.parent / "visualizations"
 OUT.mkdir(exist_ok=True)
 print(f'Output folder: {OUT.resolve()}\n')
 
@@ -73,7 +76,20 @@ TITLE_CSS = ('position:fixed;top:10px;left:60px;z-index:1000;background:white;'
 
 def title_div(title, sub=''):
     sub_html = f'<br><span style="font-size:11px;font-weight:normal">{sub}</span>' if sub else ''
-    return folium.Element(f'<div style="{TITLE_CSS}">{title}{sub_html}</div>')
+    return folium.Element(f'<div style="{TITLE_CSS}; color: #333; background-color: rgba(255,255,255,0.9);">{title}{sub_html}</div>')
+
+def get_discrete_color(available_mw):
+    """
+    User logic for 4-charger scenario (D=600kW):
+    Sufficient: >= 720 kW | Moderate: 480-719 kW | Congested: < 480 kW
+    """
+    available_kw = available_mw * 1000
+    if available_kw >= 720:
+        return '#1a9641', 'Sufficient'  # Green
+    elif available_kw >= 480:
+        return '#fec200', 'Moderate'    # Yellow
+    else:
+        return '#d7191c', 'Congested'   # Red
 
 def save_folium(m, name):
     p = OUT / f'{name}.html'
@@ -89,11 +105,16 @@ def save_plotly(fig, name):
 # 1. ROAD ROUTES
 # ══════════════════════════════════════════════════════════════
 print('\n[1/7] Road Routes ...')
-od_file = Path('data/road_routes/od_rutas/20240331_OD_rutas.csv')
+od_file = DATA_DIR / 'road_routes/od_rutas/20240331_OD_rutas.csv'
 if od_file.exists():
     df_od = pd.read_csv(od_file, nrows=500_000)   # sample for speed
     df_od['origin_prov'] = df_od['origin_zone'].astype(str).str[:2]
     df_od['dest_prov']   = df_od['destination_zone'].astype(str).str[:2]
+    
+    # FILTER: Focus on Inter-Province / Inter-CCAA flows (Interurban)
+    # We drop intra-provincial trips to highlight the long-distance arteries
+    df_od = df_od[df_od['origin_prov'] != df_od['dest_prov']]
+    
     prov_od  = df_od.groupby(['origin_prov','dest_prov'])['trips'].sum().reset_index()
     prov_out = (df_od.groupby('origin_prov')['trips'].sum()
                 .reset_index().rename(columns={'origin_prov':'code','trips':'total_trips'}))
@@ -106,7 +127,7 @@ if od_file.exists():
     max_flow  = top_flows['trips'].max()
 
     # Folium
-    m = folium.Map(location=[40.2,-3.5], zoom_start=6, tiles='OpenStreetMap')
+    m = folium.Map(location=[40.2,-3.5], zoom_start=6, tiles='CartoDB Positron')
     for _, r in prov_out.iterrows():
         ratio = r['total_trips']/max_trips
         folium.CircleMarker([r['lat'],r['lon']], radius=5+27*ratio,
@@ -121,28 +142,8 @@ if od_file.exists():
                 tooltip=f"{PC[o][2]} → {PC[d][2]}: {r['trips']:,.0f}").add_to(m)
     m.get_root().html.add_child(title_div('🛣️ Road OD Flows — Spain (2024-03-31) [Folium]',
                                           'Circles = total trips | Lines = top 40 inter-province flows'))
-    save_folium(m, '01a_road_routes_folium')
+    save_folium(m, 'road_od_flows_spain')
 
-    # Plotly
-    fig = go.Figure()
-    for _, r in top_flows.iterrows():
-        o,d = r['origin_prov'],r['dest_prov']
-        if o in PC and d in PC:
-            a = 0.25+0.60*(r['trips']/max_flow)
-            fig.add_trace(go.Scattermapbox(lat=[PC[o][0],PC[d][0],None],lon=[PC[o][1],PC[d][1],None],
-                mode='lines',line=dict(color=f'rgba(217,72,1,{a:.2f})',width=0.8+4*(r['trips']/max_flow)),
-                hoverinfo='skip',showlegend=False))
-    fig.add_trace(go.Scattermapbox(
-        lat=prov_out['lat'], lon=prov_out['lon'], mode='markers',
-        marker=dict(size=prov_out['total_trips']/max_trips*36+6, color=prov_out['total_trips'],
-                    colorscale='Blues', showscale=True,
-                    colorbar=dict(title='Trips'), opacity=0.85),
-        text=prov_out['name'], customdata=prov_out[['total_trips']],
-        hovertemplate='<b>%{text}</b><br>Trips: %{customdata[0]:,.0f}<extra></extra>'))
-    fig.update_layout(mapbox_style='open-street-map', mapbox=dict(center=dict(lat=40.2,lon=-3.5),zoom=5),
-        title='Road OD Flows — Total Trips by Province [Plotly / OSM]',
-        height=620, margin=dict(l=0,r=0,t=50,b=0))
-    save_plotly(fig, '01b_road_routes_plotly')
 else:
     print('  ⚠️  OD routes CSV not found — skipping Road Routes')
 
@@ -171,40 +172,30 @@ try:
             'n_connectors': len(connectors),
             'operator': ftext(site,'operatorName')})
     df_ch = pd.DataFrame(records)
+    
+    # FILTER: Drop stations within major city centers (Interurban/Entrance only)
+    major_cities = ['MADRID', 'BARCELONA', 'VALENCIA', 'SEVILLA', 'ZARAGOZA', 'BILBAO', 'MALAGA']
+    df_ch = df_ch[~df_ch['name'].str.upper().str.contains('|'.join(major_cities))]
+    
     df_ch = df_ch[df_ch['latitude'].between(35,44.5) & df_ch['longitude'].between(-9.5,5)].reset_index(drop=True)
-    print(f'  {len(df_ch):,} charging sites parsed')
-
-    # Folium
-    m = folium.Map(location=[40.2,-3.5], zoom_start=6, tiles='OpenStreetMap')
-    HeatMap(df_ch[['latitude','longitude']].values.tolist(), radius=12, blur=18,
-            min_opacity=0.35, name='Heat Density').add_to(m)
-    mc = MarkerCluster(name='Charging Sites (cluster)', show=False).add_to(m)
-    for _, r in df_ch.iterrows():
-        folium.CircleMarker([r['latitude'],r['longitude']], radius=4,
-            color='#2ca25f', fill=True, fill_color='#66c2a4', fill_opacity=0.8, weight=0.8,
-            popup=folium.Popup(f"<b>{r['name'] or 'EV Charger'}</b><br>Operator: {r['operator'] or 'N/A'}",max_width=220),
-            tooltip=r['name'] or 'EV Charger').add_to(mc)
-    folium.LayerControl(collapsed=False).add_to(m)
-    m.get_root().html.add_child(title_div('⚡ EV Charging Points — Spain DGT [Folium]',
-                                          f'{len(df_ch):,} sites · Toggle: HeatMap | Cluster markers'))
-    save_folium(m, '02a_ev_charging_folium')
+    print(f'  {len(df_ch):,} interurban charging sites parsed')
 
     # Plotly
     fig1 = px.density_mapbox(df_ch, lat='latitude', lon='longitude', radius=10,
-        center=dict(lat=40.2,lon=-3.5), zoom=5, mapbox_style='open-street-map',
+        center=dict(lat=40.2,lon=-3.5), zoom=5, mapbox_style='carto-positron',
         title=f'EV Charging Density — Spain DGT ({len(df_ch):,} sites) [Plotly / OSM]',
         color_continuous_scale='YlOrRd')
     fig1.update_layout(height=580, margin=dict(l=0,r=0,t=50,b=0))
-    save_plotly(fig1, '02b_ev_charging_density_plotly')
+    save_plotly(fig1, 'ev_charging_density_spain')
 
     fig2 = px.scatter_mapbox(df_ch, lat='latitude', lon='longitude',
         hover_name='name', hover_data={'operator':True,'site_id':False,'latitude':False,'longitude':False},
         color_discrete_sequence=['#2ca25f'], zoom=5, center=dict(lat=40.2,lon=-3.5),
-        mapbox_style='open-street-map', opacity=0.55,
+        mapbox_style='carto-positron', opacity=0.55,
         title='EV Charging Sites — individual points [Plotly / OSM]')
     fig2.update_traces(marker_size=5)
     fig2.update_layout(height=580, margin=dict(l=0,r=0,t=50,b=0))
-    save_plotly(fig2, '02c_ev_charging_scatter_plotly')
+    save_plotly(fig2, 'ev_charging_stations_spain')
 except Exception as e:
     print(f'  ⚠️  EV Charging skipped: {e}')
 
@@ -212,7 +203,7 @@ except Exception as e:
 # 3. IBERDROLA
 # ══════════════════════════════════════════════════════════════
 print('\n[3/7] Iberdrola ...')
-ib_path = Path('data/Iberdrola Historical Map of Electricity Consumption Capacity/2026_03_05_R1-001_Demanda.csv')
+ib_path = DATA_DIR / 'Iberdrola Historical Map of Electricity Consumption Capacity/2026_03_05_R1-001_Demanda.csv'
 if ib_path.exists():
     df_ib = pd.read_csv(ib_path, sep=';', encoding='utf-8-sig', decimal=',', thousands='.', on_bad_lines='skip')
     df_ib.columns = df_ib.columns.str.strip()
@@ -225,37 +216,40 @@ if ib_path.exists():
     df_ib = df_ib[df_ib['latitude'].between(35,44.5) & df_ib['longitude'].between(-9.5,5)].reset_index(drop=True)
     df_ib = util_col(df_ib)
 
-    colormap = cm.LinearColormap(CMAP_RYG, vmin=0, vmax=1, caption='Capacity Utilisation')
-
     # Folium
-    m = folium.Map(location=[40.4,-3.7], zoom_start=6, tiles='OpenStreetMap')
-    colormap.add_to(m)
+    m = folium.Map(location=[40.4,-3.7], zoom_start=6, tiles='CartoDB Positron')
+    
     for _, r in df_ib.iterrows():
-        col = colormap(r['util'])
+        col, status = get_discrete_color(r['capacity_available_mw'])
         folium.CircleMarker([r['latitude'],r['longitude']],
-            radius=max(3,min(11, r['capacity_occupied_mw']/20+3)),
-            color=col, fill=True, fill_color=col, fill_opacity=0.75, weight=0.5,
+            radius=6,
+            color=col, fill=True, fill_color=col, fill_opacity=0.8, weight=1,
             popup=folium.Popup(
-                f"<b>{r['substation_id']}</b><br>Province: {r['province']}<br>"
-                f"Voltage: {r['voltage_kv']} kV<br>Available: {r['capacity_available_mw']:.2f} MW<br>"
-                f"Occupied: {r['capacity_occupied_mw']:.2f} MW<br>Utilisation: {r['util_pct']:.1f}%",max_width=250),
-            tooltip=f"{r['substation_id']} | {r['util_pct']:.0f}% used").add_to(m)
-    m.get_root().html.add_child(title_div('🔌 Iberdrola i-DE — Consumption Capacity [Folium]',
-                                          f"{len(df_ib):,} substations · Size=occupied MW · Colour: green=free → red=full"))
-    save_folium(m, '03a_iberdrola_folium')
+                f"<div style='color:#333; min-width:150px; font-family:sans-serif;'>"
+                f"<h4 style='margin:0; color:{col};'>{status}</h4><hr>"
+                f"<b>Substation:</b> {r['substation_id']}<br>"
+                f"<b>Available:</b> {r['capacity_available_mw']:.2f} MW<br>"
+                f"<b>Readiness:</b> 4-Charger Site (600kW)"
+                f"</div>", max_width=250),
+            tooltip=f"{r['substation_id']} | {status}").add_to(m)
+    
+    # Legend overlay
+    legend_html = f"""
+    <div style="position:fixed; bottom: 50px; left: 50px; width: 220px; height: 110px; 
+                background-color: white; border:2px solid grey; z-index:9999; font-size:12px;
+                padding: 10px; border-radius: 8px; color: #333; line-height: 1.6;">
+        <b>Grid Readiness (600kW)</b><br>
+        <i style="background: #1a9641; width: 12px; height: 12px; display: inline-block; border-radius:50%;"></i> Sufficient (≥ 720 kW)<br>
+        <i style="background: #fec200; width: 12px; height: 12px; display: inline-block; border-radius:50%;"></i> Moderate (480-719 kW)<br>
+        <i style="background: #d7191c; width: 12px; height: 12px; display: inline-block; border-radius:50%;"></i> Congested (< 480 kW)<br>
+    </div>
+    """
+    m.get_root().html.add_child(folium.Element(legend_html))
+    
+    m.get_root().html.add_child(title_div('🔌 Iberdrola i-DE — Expansion Readiness',
+                                          "Scenario: 4 x 150kW Chargers (Total Demand: 600kW)"))
+    save_folium(m, 'iberdrola_ide_expansion_readiness')
 
-    # Plotly
-    df_ib['size_col'] = df_ib['capacity_occupied_mw'].clip(upper=200).fillna(1)+2
-    fig = px.scatter_mapbox(df_ib, lat='latitude', lon='longitude',
-        color='util_pct', size='size_col', hover_name='substation_id',
-        hover_data={'province':True,'voltage_kv':True,'capacity_available_mw':':.2f',
-                    'capacity_occupied_mw':':.2f','util_pct':':.1f','latitude':False,'longitude':False,'size_col':False},
-        color_continuous_scale='RdYlGn_r', range_color=[0,100], size_max=18,
-        zoom=5, center=dict(lat=40.4,lon=-3.7), mapbox_style='open-street-map',
-        title='Iberdrola i-DE — Substation Consumption Capacity Utilisation (%) [Plotly / OSM]',
-        labels={'util_pct':'Utilisation (%)'})
-    fig.update_layout(height=650, margin=dict(l=0,r=0,t=50,b=0))
-    save_plotly(fig, '03b_iberdrola_plotly')
 else:
     print('  ⚠️  Iberdrola CSV not found')
 
@@ -263,7 +257,7 @@ else:
 # 4. ENDESA
 # ══════════════════════════════════════════════════════════════
 print('\n[4/7] ENDESA ...')
-endesa_dir = Path('data/ENDESA - e-distribucion')
+endesa_dir = DATA_DIR / 'ENDESA - e-distribucion'
 csv_files  = sorted(endesa_dir.glob('*.csv')) if endesa_dir.exists() else []
 if csv_files:
     dfs = []
@@ -288,41 +282,42 @@ if csv_files:
     if 'substation_name' not in df_en.columns:
         df_en['substation_name'] = df_en.get('substation_id','N/A')
 
-    colormap = cm.LinearColormap(CMAP_RYG, vmin=0, vmax=1, caption='Capacity Utilisation')
-    operators = df_en['grid_operator'].dropna().unique()
-
     # Folium
-    m = folium.Map(location=[38.5,-2.0], zoom_start=6, tiles='OpenStreetMap')
-    colormap.add_to(m)
+    m = folium.Map(location=[38.5,-2.0], zoom_start=6, tiles='CartoDB Positron')
+    operators = df_en['grid_operator'].dropna().unique()
     fg = {op: folium.FeatureGroup(name=f'ENDESA {op}').add_to(m) for op in operators}
     for _, r in df_en.iterrows():
-        col = colormap(r['util']); name = r.get('substation_name','N/A')
+        col, status = get_discrete_color(r['capacity_available_mw'])
+        name = r.get('substation_name','N/A')
         folium.CircleMarker([r['latitude'],r['longitude']],
-            radius=max(3,min(11,r['capacity_occupied_mw']/15+3)),
-            color=col, fill=True, fill_color=col, fill_opacity=0.75, weight=0.5,
+            radius=6,
+            color=col, fill=True, fill_color=col, fill_opacity=0.8, weight=1,
             popup=folium.Popup(
-                f"<b>{name}</b><br>Operator: {r['grid_operator']}<br>"
-                f"Voltage: {r['voltage_kv']} kV<br>Available: {r['capacity_available_mw']:.2f} MW<br>"
-                f"Occupied: {r['capacity_occupied_mw']:.2f} MW<br>Utilisation: {r['util_pct']:.1f}%",max_width=260),
-            tooltip=f"{name} | {r['util_pct']:.0f}%").add_to(fg.get(r['grid_operator'],m))
+                f"<div style='color:#333; min-width:150px; font-family:sans-serif;'>"
+                f"<h4 style='margin:0; color:{col};'>{status}</h4><hr>"
+                f"<b>Node:</b> {name}<br>"
+                f"<b>Available:</b> {r['capacity_available_mw']:.2f} MW<br>"
+                f"<b>Provider:</b> {r['grid_operator']}"
+                f"</div>", max_width=260),
+            tooltip=f"{name} | {status}").add_to(fg.get(r['grid_operator'],m))
+    
+    legend_html = f"""
+    <div style="position:fixed; bottom: 50px; left: 50px; width: 180px; height: 110px; 
+                background-color: white; border:2px solid grey; z-index:9999; font-size:12px;
+                padding: 10px; border-radius: 8px; color: #333;">
+        <b>Readiness (600kW Demand)</b><br>
+        <i style="background: #1a9641; width: 12px; height: 12px; display: inline-block; border-radius:50%;"></i> Sufficient (≥ 720 kW)<br>
+        <i style="background: #fec200; width: 12px; height: 12px; display: inline-block; border-radius:50%;"></i> Moderate (480-719 kW)<br>
+        <i style="background: #d7191c; width: 12px; height: 12px; display: inline-block; border-radius:50%;"></i> Congested (< 480 kW)<br>
+    </div>
+    """
+    m.get_root().html.add_child(folium.Element(legend_html))
+    
     folium.LayerControl(collapsed=False).add_to(m)
-    m.get_root().html.add_child(title_div('⚡ ENDESA e-distribución — Generation Capacity [Folium]',
-                                          'R1-026: Aragón | R1-299: Andalucía | Colour = utilisation %'))
-    save_folium(m, '04a_endesa_folium')
+    m.get_root().html.add_child(title_div('⚡ ENDESA e-distribución — Generation Capacity',
+                                          'Discrete Readiness segments for 600kW deployments'))
+    save_folium(m, 'endesa_edistribucion_expansion_readiness')
 
-    # Plotly
-    df_en['size_col'] = df_en['capacity_occupied_mw'].clip(upper=500).fillna(1)+2
-    fig = px.scatter_mapbox(df_en, lat='latitude', lon='longitude',
-        color='util_pct', size='size_col', hover_name='substation_name',
-        hover_data={'autonomous_community':True,'voltage_kv':True,'capacity_available_mw':':.2f',
-                    'capacity_occupied_mw':':.2f','util_pct':':.1f','grid_operator':True,
-                    'latitude':False,'longitude':False,'size_col':False},
-        color_continuous_scale='RdYlGn_r', range_color=[0,100], size_max=18,
-        zoom=5, center=dict(lat=38.5,lon=-2.0), mapbox_style='open-street-map',
-        title='ENDESA e-distribucion - Generation Node Capacity Utilisation (%) [Plotly / OSM]',
-        labels={'util_pct':'Utilisation (%)','grid_operator':'Grid Operator'})
-    fig.update_layout(height=650, margin=dict(l=0,r=0,t=50,b=0))
-    save_plotly(fig, '04b_endesa_plotly')
 else:
     print('  ⚠️  ENDESA CSV files not found')
 
@@ -330,7 +325,7 @@ else:
 # 5. VIESGO
 # ══════════════════════════════════════════════════════════════
 print('\n[5/7] VIESGO ...')
-viesgo_dir = Path('data/VIESGO')
+viesgo_dir = DATA_DIR / 'VIESGO'
 
 def load_viesgo(fname):
     df = pd.read_csv(viesgo_dir/fname, sep=';', encoding='latin-1', skip_blank_lines=True)
@@ -362,48 +357,42 @@ if viesgo_dir.exists():
     colormap = cm.LinearColormap(CMAP_RYG, vmin=0, vmax=1, caption='Capacity Utilisation')
 
     # Folium
-    m = folium.Map(location=[43.2,-4.5], zoom_start=7, tiles='OpenStreetMap')
-    colormap.add_to(m)
+    m = folium.Map(location=[43.2,-4.5], zoom_start=7, tiles='CartoDB Positron')
     fg_d = folium.FeatureGroup(name='⬇ Demand').add_to(m)
     fg_g = folium.FeatureGroup(name='⬆ Generation').add_to(m)
     for fg, df, tag in [(fg_d,df_vd,'DEMAND'),(fg_g,df_vg,'GENERATION')]:
         for _, r in df.dropna(subset=['latitude','longitude']).iterrows():
-            col = colormap(r['util'])
+            col, status = get_discrete_color(r['capacity_available_mw'])
             name = r.get('substation_name', r.get('substation_id','N/A'))
             folium.CircleMarker([r['latitude'],r['longitude']],
-                radius=max(4,min(14,r['capacity_occupied_mw']/10+4)),
-                color=col, fill=True, fill_color=col, fill_opacity=0.8, weight=0.5,
+                radius=6,
+                color=col, fill=True, fill_color=col, fill_opacity=0.8, weight=1,
                 popup=folium.Popup(
-                    f"<b>{name}</b> [{tag}]<br>Province: {r['province']}<br>"
-                    f"Voltage: {r['voltage_kv']} kV<br>Available: {r['capacity_available_mw']:.2f} MW<br>"
-                    f"Occupied: {r['capacity_occupied_mw']:.2f} MW<br>Utilisation: {r['util_pct']:.1f}%",max_width=250),
-                tooltip=f"{name} [{tag[0]}] | {r['util_pct']:.0f}%").add_to(fg)
+                    f"<div style='color:#333; min-width:150px; font-family:sans-serif;'>"
+                    f"<h4 style='margin:0; color:{col};'>{status}</h4><hr>"
+                    f"<b>Substation:</b> {name} [{tag}]<br>"
+                    f"<b>Available:</b> {r['capacity_available_mw']:.2f} MW<br>"
+                    f"<b>Deployment:</b> 600kW Scenario"
+                    f"</div>", max_width=250),
+                tooltip=f"{name} [{tag[0]}] | {status}").add_to(fg)
+    
+    legend_html = f"""
+    <div style="position:fixed; bottom: 50px; left: 50px; width: 180px; height: 110px; 
+                background-color: white; border:2px solid grey; z-index:9999; font-size:12px;
+                padding: 10px; border-radius: 8px; color: #333;">
+        <b>Readiness (600kW Demand)</b><br>
+        <i style="background: #1a9641; width: 12px; height: 12px; display: inline-block; border-radius:50%;"></i> Sufficient (≥ 720 kW)<br>
+        <i style="background: #fec200; width: 12px; height: 12px; display: inline-block; border-radius:50%;"></i> Moderate (480-719 kW)<br>
+        <i style="background: #d7191c; width: 12px; height: 12px; display: inline-block; border-radius:50%;"></i> Congested (< 480 kW)<br>
+    </div>
+    """
+    m.get_root().html.add_child(folium.Element(legend_html))
+    
     folium.LayerControl(collapsed=False).add_to(m)
-    m.get_root().html.add_child(title_div('🌐 VIESGO Distribution — Northern Spain [Folium]',
-                                          '177 substations · Toggle: ⬇ Demand | ⬆ Generation · Colour = utilisation %'))
-    save_folium(m, '05a_viesgo_folium')
+    m.get_root().html.add_child(title_div('🌐 VIESGO Distribution — Expansion Readiness',
+                                          'Scenario: 4 x 150kW Chargers (Total Demand: 600kW)'))
+    save_folium(m, 'viesgo_distribution_expansion_readiness')
 
-    # Plotly
-    df_vd2 = df_vd.dropna(subset=['latitude','longitude']).copy(); df_vd2['type']='Demand'
-    df_vg2 = df_vg.dropna(subset=['latitude','longitude']).copy(); df_vg2['type']='Generation'
-    for df in [df_vd2,df_vg2]:
-        df['size_col'] = df['capacity_occupied_mw'].clip(upper=200).fillna(1)+3
-        if 'substation_name' not in df.columns: df['substation_name'] = df.get('substation_id','N/A')
-    cols = ['latitude','longitude','province','voltage_kv','capacity_available_mw',
-            'capacity_occupied_mw','util_pct','size_col','type','substation_name']
-    comb = pd.concat([df_vd2[[c for c in cols if c in df_vd2.columns]],
-                      df_vg2[[c for c in cols if c in df_vg2.columns]]], ignore_index=True)
-    fig = px.scatter_mapbox(comb, lat='latitude', lon='longitude',
-        color='util_pct', size='size_col', hover_name='substation_name',
-        hover_data={'province':True,'voltage_kv':True,'capacity_available_mw':':.2f',
-                    'capacity_occupied_mw':':.2f','util_pct':':.1f','type':True,
-                    'latitude':False,'longitude':False,'size_col':False},
-        color_continuous_scale='RdYlGn_r', range_color=[0,100], size_max=20,
-        zoom=6, center=dict(lat=43.2,lon=-4.5), mapbox_style='open-street-map',
-        title='VIESGO Distribution - Demand & Generation Capacity - Northern Spain [Plotly / OSM]',
-        labels={'util_pct':'Utilisation (%)','type':'Capacity Type'})
-    fig.update_layout(height=650, margin=dict(l=0,r=0,t=50,b=0))
-    save_plotly(fig, '05b_viesgo_plotly')
 else:
     print('  ⚠️  VIESGO data folder not found')
 
@@ -456,47 +445,6 @@ if mini:
     prov_ev['name'] = prov_ev['code'].map(lambda c: PC[c][2])
     max_ev = prov_ev['total_ev'].max()
 
-    # Folium
-    m = folium.Map(location=[40.2,-3.5], zoom_start=6, tiles='OpenStreetMap')
-    for _, r in prov_ev.iterrows():
-        ratio = r['total_ev']/max_ev; bev_pct = 100*r['pure_bev']/max(r['total_ev'],1)
-        folium.CircleMarker([r['lat'],r['lon']], radius=5+28*ratio,
-            color='#08306b', weight=1, fill=True, fill_color='#4292c6', fill_opacity=0.75,
-            popup=folium.Popup(
-                f"<b>{r['name']}</b><br>Total EVs: {r['total_ev']:,}<br>"
-                f"Pure BEV: {r['pure_bev']:,} ({bev_pct:.1f}%)<br>PHEV: {r['phev']:,}",max_width=230),
-            tooltip=f"{r['name']} — {r['total_ev']:,} EVs").add_to(m)
-    heat = [[r['lat'],r['lon'],r['total_ev']] for _,r in prov_ev.iterrows()]
-    HeatMap(heat, radius=30, blur=25, min_opacity=0.3,
-            gradient={'0.4':'blue','0.65':'lime','1':'red'}).add_to(m)
-    m.get_root().html.add_child(title_div('🚗⚡ EV Registrations — Spain by Province (2025) [Folium]',
-                                          'Circles = total EV count | Heat = density distribution'))
-    save_folium(m, '06a_ev_registrations_folium')
-
-    # Plotly — map
-    prov_ev['size_col'] = prov_ev['total_ev']/max_ev*36+5
-    prov_ev['bev_pct']  = 100*prov_ev['pure_bev']/prov_ev['total_ev'].clip(lower=1)
-    fig1 = px.scatter_mapbox(prov_ev, lat='lat', lon='lon',
-        color='total_ev', size='size_col', hover_name='name',
-        hover_data={'total_ev':':,','pure_bev':':,','phev':':,','bev_pct':':.1f',
-                    'lat':False,'lon':False,'size_col':False},
-        color_continuous_scale='Blues', size_max=40,
-        zoom=5, center=dict(lat=40.2,lon=-3.5), mapbox_style='open-street-map',
-        title='EV Vehicle Registrations by Province — Spain 2025 [Plotly / OSM]',
-        labels={'total_ev':'Total EVs','bev_pct':'BEV share (%)'})
-    fig1.update_layout(height=650, margin=dict(l=0,r=0,t=50,b=0))
-    save_plotly(fig1, '06b_ev_registrations_map_plotly')
-
-    # Plotly — monthly trend
-    df_ev['month_dt'] = pd.to_datetime(df_ev[['year','month']].assign(day=1))
-    monthly = df_ev.groupby(['month_dt','propulsion_label']).size().reset_index(name='count')
-    fig2 = px.area(monthly, x='month_dt', y='count', color='propulsion_label',
-        title='Monthly EV Registrations Trend — Spain 2025 [Plotly]',
-        labels={'count':'Registrations','month_dt':'Month','propulsion_label':'Type'},
-        color_discrete_map={'Pure Electric':'#2171b5','PHEV Gasoline':'#fd8d3c',
-                            'PHEV Diesel':'#e6550d','PHEV Other':'#a63603'})
-    fig2.update_layout(height=400, margin=dict(l=0,r=0,t=50,b=0))
-    save_plotly(fig2, '06c_ev_registrations_trend_plotly')
 else:
     print('  ⚠️  No EV registration data fetched')
 
@@ -515,7 +463,7 @@ try:
     print(f'  {len(gdf)} charging points loaded')
 
     # Folium
-    m = folium.Map(location=[42.225,-8.720], zoom_start=13, tiles='OpenStreetMap')
+    m = folium.Map(location=[42.225,-8.720], zoom_start=13, tiles='CartoDB Positron')
     for _, r in gdf.iterrows():
         web_html = (f'<br>🌐 <a href="{r["web"]}" target="_blank">Website</a>'
                     if r.get('web') and pd.notna(r['web']) else '')
@@ -531,18 +479,8 @@ try:
         fill=True, fill_opacity=0.05, weight=2, dash_array='8').add_to(m)
     m.get_root().html.add_child(title_div('⚡ Vigo EV Charging Points — Municipal Dataset [Folium]',
                                           f'{len(gdf)} public charging locations · Click for details'))
-    save_folium(m, '07a_vigo_charging_folium')
+    save_folium(m, 'vigo_ev_charging_points')
 
-    # Plotly
-    fig = px.scatter_mapbox(gdf, lat='latitude', lon='longitude', hover_name='nombre',
-        hover_data={'calle':True,'barrio':True,'codigo_postal':True,'telefono':True,
-                    'web':True,'latitude':False,'longitude':False},
-        color_discrete_sequence=['#2ca25f'], zoom=13, center=dict(lat=42.225,lon=-8.720),
-        mapbox_style='open-street-map',
-        title='Vigo EV Charging Points — Municipal Open Data [Plotly / OSM]')
-    fig.update_traces(marker=dict(size=15, opacity=0.9))
-    fig.update_layout(height=600, margin=dict(l=0,r=0,t=50,b=0))
-    save_plotly(fig, '07b_vigo_charging_plotly')
 except Exception as e:
     print(f'  ⚠️  Vigo skipped: {e}')
 
