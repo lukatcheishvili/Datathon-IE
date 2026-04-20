@@ -4,6 +4,7 @@ Run:  streamlit run dashboard.py
 """
 import streamlit as st
 from pathlib import Path
+import subprocess, sys
 import streamlit.components.v1 as components
 
 # ── Page config ─────────────────────────────────────────────────────────────────
@@ -17,21 +18,16 @@ st.set_page_config(
 # ── Global CSS ──────────────────────────────────────────────────────────────────
 st.markdown("""
 <style>
-/* Hide Streamlit default chrome */
+/* ── Hide Streamlit chrome ── */
 #MainMenu, footer,
 [data-testid="stStatusWidget"],
-[data-testid="stToolbar"]              { visibility: hidden; height: 0; }
-header[data-testid="stHeader"]         { background: transparent; height: 0; }
-[data-testid="stSidebar"]              { display: none; }
+[data-testid="stToolbar"]       { visibility: hidden; height: 0; }
+header[data-testid="stHeader"]  { background: transparent; height: 0; }
+[data-testid="stSidebar"]       { display: none; }
+.block-container                { padding: 0 !important; max-width: 100vw !important; }
+.stApp                          { background: #0d1117; }
 
-/* Remove all default padding */
-.block-container {
-    padding: 0 !important;
-    max-width: 100vw !important;
-}
-.stApp { background: #f0f2f5; }
-
-/* ── Top banner ── */
+/* ── Banner ── */
 .app-banner {
     background: linear-gradient(90deg, #1a1a2e 0%, #0f3460 100%);
     padding: 12px 28px;
@@ -42,59 +38,96 @@ header[data-testid="stHeader"]         { background: transparent; height: 0; }
 }
 .banner-icon  { font-size: 26px; }
 .banner-title { font-size: 19px; font-weight: 700; color: #e8eaf0;
-                font-family: 'Segoe UI', Arial, sans-serif; line-height: 1.3; }
+                font-family: 'Segoe UI', Arial, sans-serif; }
 .banner-sub   { font-size: 11px; color: #8aa0c0; margin-top: 2px;
                 font-family: 'Segoe UI', Arial, sans-serif; }
 
-/* ── Nav strip ── */
+/* ── Nav strip background ── */
 .nav-strip {
-    background: #1a1a2e;
-    padding: 8px 20px;
-    border-bottom: 1px solid #0f3460;
+    background: #161b27;
+    padding: 8px 16px;
+    border-bottom: 1px solid #1e2d45;
 }
 
-/* ── Streamlit radio styled as pill buttons ── */
-div[data-testid="stRadio"] > label { display: none; }
+/* ── Radio → pill buttons ──
+   Hide the outer label (the "Select dashboard" text) */
+div[data-testid="stRadio"] > label { display: none !important; }
+
+/* Row of pills */
 div[data-testid="stRadio"] > div {
     display: flex !important;
-    flex-wrap: wrap;
+    flex-wrap: wrap !important;
     gap: 6px !important;
+    background: transparent !important;
 }
+
+/* Each pill wrapper */
 div[data-testid="stRadio"] > div > label {
-    background: #16213e !important;
-    color: #8aa0c0 !important;
-    border: 1px solid #2a3a5c !important;
+    background: #1c2333 !important;
+    border: 1px solid #2a3f5f !important;
     border-radius: 6px !important;
-    padding: 6px 14px !important;
+    padding: 5px 14px 5px 10px !important;
+    cursor: pointer !important;
+    transition: all 0.15s !important;
+    display: flex !important;
+    align-items: center !important;
+}
+
+/* Text inside pill — keep visible */
+div[data-testid="stRadio"] > div > label p,
+div[data-testid="stRadio"] > div > label span,
+div[data-testid="stRadio"] > div > label div[data-testid="stMarkdownContainer"] {
+    color: #8aa0c0 !important;
     font-size: 12.5px !important;
     font-weight: 500 !important;
-    cursor: pointer !important;
-    transition: all 0.18s !important;
     font-family: 'Segoe UI', Arial, sans-serif !important;
+    display: block !important;
+    visibility: visible !important;
 }
+
+/* Hover state */
 div[data-testid="stRadio"] > div > label:hover {
     background: #0f3460 !important;
-    color: #dce8ff !important;
     border-color: #4a7fc1 !important;
 }
+div[data-testid="stRadio"] > div > label:hover p,
+div[data-testid="stRadio"] > div > label:hover span {
+    color: #dce8ff !important;
+}
+
 /* Active/selected pill */
-div[data-testid="stRadio"] > div > label[data-baseweb="radio"]:has(input:checked),
 div[data-testid="stRadio"] > div > label:has(input:checked) {
     background: #0f3460 !important;
-    color: #ffffff !important;
     border-color: #4a90d9 !important;
-    box-shadow: 0 0 0 2px rgba(74,144,217,0.25) !important;
+    box-shadow: 0 0 0 2px rgba(74,144,217,0.3) !important;
 }
-/* Hide the radio circle */
-div[data-testid="stRadio"] input[type="radio"],
-div[data-testid="stRadio"] span[data-testid="stMarkdownContainer"] > p { display: none !important; }
-div[data-testid="stRadio"] div[data-testid="stMarkdownContainer"] { display: none !important; }
+div[data-testid="stRadio"] > div > label:has(input:checked) p,
+div[data-testid="stRadio"] > div > label:has(input:checked) span {
+    color: #ffffff !important;
+    font-weight: 700 !important;
+}
 
-/* ── iframe wrapper ── */
+/* Overview pill always accented */
+div[data-testid="stRadio"] > div > label:first-child {
+    border-color: #4a90d9 !important;
+    background: #0d2341 !important;
+}
+div[data-testid="stRadio"] > div > label:first-child p,
+div[data-testid="stRadio"] > div > label:first-child span { color: #90c8ff !important; }
+
+/* Hide only the radio circle dot, not the text */
+div[data-testid="stRadio"] input[type="radio"] {
+    position: absolute !important;
+    opacity: 0 !important;
+    width: 0 !important;
+    height: 0 !important;
+}
+div[data-testid="stRadio"] [data-baseweb="radio"] > div:first-child {
+    display: none !important;
+}
+
+/* ── iframe ── */
 iframe { border: none !important; display: block; }
-
-/* ── Loading state ── */
-.stSpinner { padding: 40px; }
 </style>
 """, unsafe_allow_html=True)
 
@@ -102,48 +135,14 @@ iframe { border: none !important; display: block; }
 CHARTS_DIR = Path(__file__).parent / "visualizations"
 
 CHARTS = [
-    {
-        "id":   "iberdrola",
-        "name": "Iberdrola i-DE — Readiness",
-        "icon": "🔌",
-        "file": "iberdrola_ide_expansion_readiness.html",
-    },
-    {
-        "id":   "endesa",
-        "name": "ENDESA e-distribución — Readiness",
-        "icon": "⚡",
-        "file": "endesa_edistribucion_expansion_readiness.html",
-    },
-    {
-        "id":   "viesgo",
-        "name": "VIESGO — Readiness",
-        "icon": "🌐",
-        "file": "viesgo_distribution_expansion_readiness.html",
-    },
-    {
-        "id":   "road",
-        "name": "Road OD Flows",
-        "icon": "🛣️",
-        "file": "road_od_flows_spain.html",
-    },
-    {
-        "id":   "ev_density",
-        "name": "EV Charging Density",
-        "icon": "🌡️",
-        "file": "ev_charging_density_spain.html",
-    },
-    {
-        "id":   "ev_scatter",
-        "name": "EV Charging Stations",
-        "icon": "📍",
-        "file": "ev_charging_stations_spain.html",
-    },
-    {
-        "id":   "vigo",
-        "name": "Vigo Charging Points",
-        "icon": "🗺️",
-        "file": "vigo_ev_charging_points.html",
-    },
+    {"id": "overview",   "name": "🗺️  All Data Overview",              "file": "overview_all_data.html"},
+    {"id": "iberdrola",  "name": "🔌  Iberdrola i-DE — Readiness",      "file": "iberdrola_ide_expansion_readiness.html"},
+    {"id": "endesa",     "name": "⚡  ENDESA e-distribución — Readiness","file": "endesa_edistribucion_expansion_readiness.html"},
+    {"id": "viesgo",     "name": "🌐  VIESGO — Readiness",              "file": "viesgo_distribution_expansion_readiness.html"},
+    {"id": "road",       "name": "🛣️  Road OD Flows",                   "file": "road_od_flows_spain.html"},
+    {"id": "ev_density", "name": "🌡️  EV Charging Density",             "file": "ev_charging_density_spain.html"},
+    {"id": "ev_scatter", "name": "📍  EV Charging Stations",            "file": "ev_charging_stations_spain.html"},
+    {"id": "vigo",       "name": "🗺️  Vigo Charging Points",            "file": "vigo_ev_charging_points.html"},
 ]
 
 # ── Banner ──────────────────────────────────────────────────────────────────────
@@ -162,12 +161,9 @@ st.markdown("""
 # ── Navigation ──────────────────────────────────────────────────────────────────
 st.markdown('<div class="nav-strip">', unsafe_allow_html=True)
 
-chart_labels = [f"{c['icon']}  {c['name']}" for c in CHARTS]
-chart_ids    = [c["id"] for c in CHARTS]
-
-selected_label = st.radio(
+selected = st.radio(
     label="Select dashboard",
-    options=chart_labels,
+    options=[c["name"] for c in CHARTS],
     index=0,
     horizontal=True,
     label_visibility="collapsed",
@@ -175,17 +171,36 @@ selected_label = st.radio(
 
 st.markdown('</div>', unsafe_allow_html=True)
 
-# ── Resolve selected chart ──────────────────────────────────────────────────────
-selected_idx   = chart_labels.index(selected_label)
-active_chart   = CHARTS[selected_idx]
-chart_path     = CHARTS_DIR / active_chart["file"]
+# ── Resolve active chart ─────────────────────────────────────────────────────────
+active     = next(c for c in CHARTS if c["name"] == selected)
+chart_path = CHARTS_DIR / active["file"]
+
+# ── Auto-generate overview if missing ───────────────────────────────────────────
+if active["id"] == "overview" and not chart_path.exists():
+    st.info("⏳ Generating the All Data Overview map for the first time — this may take ~60 seconds (downloads live data)...")
+    gen_script = Path(__file__).parent / "generate_overview.py"
+    if gen_script.exists():
+        with st.spinner("Building combined overview map..."):
+            result = subprocess.run(
+                [sys.executable, str(gen_script)],
+                capture_output=True, text=True,
+                cwd=str(Path(__file__).parent)
+            )
+        if chart_path.exists():
+            st.success("✅ Overview map generated! Loading...")
+            st.rerun()
+        else:
+            st.error("❌ Generation failed. Output:")
+            st.code(result.stderr or result.stdout)
+    else:
+        st.error("generate_overview.py not found next to dashboard.py")
 
 # ── Embed chart ─────────────────────────────────────────────────────────────────
-if chart_path.exists():
-    with st.spinner(f"Loading {active_chart['name']} …"):
+elif chart_path.exists():
+    with st.spinner(f"Loading {active['name'].strip()} ..."):
         html_content = chart_path.read_text(encoding="utf-8", errors="replace")
-    # Height: fills most of a typical 1080p screen minus banner (~80px) + nav (~50px)
     components.html(html_content, height=870, scrolling=False)
+
 else:
-    st.error(f"⚠️  Chart file not found: {chart_path}")
-    st.info("Run `python generate_visualizations.py` from the Datathon folder to generate the charts.")
+    st.error(f"Chart file not found: `{active['file']}`")
+    st.info("Run `python generate_visualizations.py` from the Datathon folder to generate all charts.")
