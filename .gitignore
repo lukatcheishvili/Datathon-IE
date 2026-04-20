@@ -1,0 +1,12 @@
+# Python
+__pycache__/
+*.pyc
+.venv/
+
+# Data (adjust if needed)
+*.zip
+*.txt
+*.csv
+
+# Cache
+cache/

@@ -1,0 +1,21 @@
+[project]
+name = "datathon-notebook"
+version = "0.1.0"
+description = "Notebook environment for txt_extraction.ipynb"
+requires-python = ">=3.12,<3.13"
+dependencies = [
+    "ipykernel",
+    "matplotlib",
+    "numpy",
+    "pandas",
+    "polars",
+    "pmdarima",
+    "prophet",
+    "python-dateutil",
+    "requests",
+    "scikit-learn",
+    "statsmodels",
+]
+
+[tool.uv]
+package = false
